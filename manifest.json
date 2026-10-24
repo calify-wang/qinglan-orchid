@@ -3,9 +3,9 @@
   "downloads": [
     {
       "asset": "Qinglan-Windows.zip",
-      "bytes": 165131292,
-      "sha256": "98eed07f88081635eff1fc4d3f05a576cc9e13e11848e93a409c4507a46d39b5",
-      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.0/Qinglan-Windows.zip"
+      "bytes": 165131234,
+      "sha256": "83be295ca1f440b8dea7567aed07f379ecf529b8c42738e2e6f639a9b2c593ff",
+      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.1/Qinglan-Windows.zip"
     },
     {
       "asset": "Qinglan-macOS-Intel.zip",
@@ -31,5 +31,6 @@
       "sha256": "c5495e63abb504d7f877ee1e4fecff2ab4c30fb0f21d0f1837e7d59d4fed0316",
       "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.0/Qinglan-Android.apk"
     }
-  ]
+  ],
+  "siteVersion": "1.1.1"
 }
