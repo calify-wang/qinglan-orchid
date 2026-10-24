@@ -1,0 +1,12 @@
+{
+  "configured": true,
+  "published": false,
+  "owner": "calify-wang",
+  "repo": "qinglan-orchid",
+  "tag": "v1.1.0",
+  "basePath": "/qinglan-orchid/",
+  "publicURL": "https://calify-wang.github.io/qinglan-orchid/",
+  "releaseBase": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.0",
+  "cacheNamespace": "qinglan-pages-2225ae87f913eee8",
+  "version": "3ece8589a542bab858917764"
+}
