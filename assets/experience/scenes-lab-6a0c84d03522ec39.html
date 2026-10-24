@@ -1026,7 +1026,7 @@ window.QinglanSound=Object.freeze({version:'1.0.0',enable,disable,toggle:()=>ena
   function decode(text){const bin=atob(text),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return bytes;}
   function ownURL(s,data,type){const u=URL.createObjectURL(new Blob([data],{type}));s.urls.push(u);return u;}
   function sameOriginURL(value){const u=new URL(value,document.baseURI),origin=window.parent!==window?window.parent.location.origin:location.origin;if(!/^https?:$/.test(u.protocol)||u.origin!==origin)throw new Error('手势资源必须内嵌或来自当前网页的同源地址。');return u.href;}
-  function normalizedAssets(){const a=assets(),o={};for(const k of ['runtime','loader','wasm','model']){if(!a?.[k])throw Object.assign(new Error('此文件缺少内嵌手势识别资源，请使用完整版。'),{code:'assets-missing'});o[k]=a[k]?.url?{url:sameOriginURL(a[k].url)}:a[k];}return o;}
+  function normalizedAssets(){const a=assets(),o={};for(const k of ['runtime','loader','wasm','model']){if(!a?.[k])throw Object.assign(new Error('此文件缺少内嵌手势识别资源，请使用完整版。'),{code:'assets-missing'});o[k]=a[k]?.buffer?new Uint8Array(a[k].buffer):a[k]?.url?{url:sameOriginURL(a[k].url)}:a[k];}return o;}
   function assetURL(s,v,type){if(v?.url)return v.url;return ownURL(s,v instanceof Blob||v instanceof Uint8Array?v:decode(typeof v==='string'?v:v.base64),type);}
   async function assetBytes(v){if(v?.url){const r=await fetch(v.url,{credentials:'same-origin',cache:'force-cache'});if(!r.ok)throw new Error('模型资源读取失败：'+r.status);return new Uint8Array(await r.arrayBuffer());}if(v instanceof Blob)return new Uint8Array(await v.arrayBuffer());if(v instanceof Uint8Array)return v;return decode(typeof v==='string'?v:v.base64);}
 
@@ -1367,6 +1367,7 @@ window.QinglanSound=Object.freeze({version:'1.0.0',enable,disable,toggle:()=>ena
       if(!live(s))return {ok:false,cancelled:true,...status()};
       watchVideoFrames(s,video);
       publish({state:'loading',capturePhase:'model-loading',camera:true,hand:false,message:'摄像头画面已就绪，正在加载本地手势识别…'});
+      if(parent.OrchidExperienceResources?.prepareHandAssets){await new Promise((resolve,reject)=>{let settled=false;const finish=(fn,value)=>{if(settled)return;settled=true;s.startupCancels.delete(cancel);fn(value);};const cancel=()=>finish(reject,cancelError());s.startupCancels.add(cancel);parent.OrchidExperienceResources.prepareHandAssets(progress=>{if(live(s))publish({state:'loading',capturePhase:'model-downloading',camera:true,hand:false,message:progress.message});}).then(()=>finish(resolve),error=>finish(reject,error));if(!live(s))cancel();});if(!live(s))return {ok:false,cancelled:true,...status()};publish({state:'loading',capturePhase:'model-loading',camera:true,hand:false,message:'手势组件已准备好，正在本机启动识别…'});}
       if(s.safari){state.fallbackReason='Safari DOM-canvas compatibility';await createMainModel(s);}
       else if(support().workerCapable){
         try{await createWorker(s);}catch(e){if(!live(s))throw e;await recoverBackend(s,e);}

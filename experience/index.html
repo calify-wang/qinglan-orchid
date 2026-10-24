@@ -144,7 +144,156 @@ button,input,select,textarea,summary{font-weight:600}
 html.orchid-gloves-right #portalHandPointer{opacity:0!important}
 @media(max-width:600px){.orchid-glove{width:36px;height:45px}.orchid-glove .glove-label{top:41px;font-size:9px}.orchid-glove-left .glove-label{top:25px}.orchid-glove .glove-roll{width:46px;height:46px;left:-23px;top:-23px}}
 @media(prefers-reduced-motion:reduce){.orchid-glove{will-change:auto}}
-</style><style>.portal-brand{text-decoration:none;color:inherit}</style><link rel="canonical" href="https://calify-wang.github.io/qinglan-orchid/experience/"><meta name="description" content="清兰花棚与兰花研究院，双手互动、兰花观察与掌心开花。"><link rel="icon" type="image/png" href="/qinglan-orchid/assets/orchid-icon.png"><link rel="apple-touch-icon" href="/qinglan-orchid/assets/orchid-icon.png"><link rel="manifest" href="/qinglan-orchid/app.webmanifest"><meta name="theme-color" content="#244c38"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="清兰花棚"><link rel="apple-touch-icon" sizes="180x180" href="/qinglan-orchid/icons/orchid-180.png"><script defer src="/qinglan-orchid/install-app.js"></script></head><body><header class="portal-header"><a class="portal-brand" href="/qinglan-orchid/" aria-label="返回作品介绍与下载页"><span aria-hidden="true">兰</span><div><strong>清兰花棚</strong><small>GARDEN · RESEARCH · PLAY</small></div></a><nav class="portal-modes" aria-label="完整体验模式"><button id="modeShop" data-mode="shop" aria-pressed="false">花棚体验</button><button id="modeLab" data-mode="lab" class="active" aria-pressed="true">互动研究所</button><button id="modeBloom" data-mode="bloom" aria-pressed="false">掌心开花</button></nav><div class="portal-utilities"><button id="shellSound" disabled aria-pressed="false">音乐 · 关</button><button id="shellCamera" disabled aria-pressed="false">手势 · 关</button></div></header><main class="portal-stage" id="portalStage"><div class="portal-loading" id="portalLoading"><em>Qinglan.</em><strong id="loadingTitle">正在展开蝴蝶兰研究所</strong><p id="loadingText">图片、动效、音乐与手势组件均已收进这个文件。</p><button id="retryMode" hidden>重新打开当前场景</button></div></main><div class="portal-status" id="portalStatus" role="status" hidden></div><script id="sharedHandAssets" type="application/octet-stream"></script><script id="portalPayload" type="application/octet-stream"></script><script id="gesture-button-confirm">/* Stable strong pinch confirms once. A real open frame is required before another press. */
+</style><style>.portal-brand{text-decoration:none;color:inherit}</style><link rel="canonical" href="https://calify-wang.github.io/qinglan-orchid/experience/"><meta name="description" content="清兰花棚与兰花研究院，双手互动、兰花观察与掌心开花。"><link rel="icon" type="image/png" href="/qinglan-orchid/assets/orchid-icon.png"><link rel="apple-touch-icon" href="/qinglan-orchid/assets/orchid-icon.png"><link rel="manifest" href="/qinglan-orchid/app.webmanifest"><meta name="theme-color" content="#244c38"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="清兰花棚"><link rel="apple-touch-icon" sizes="180x180" href="/qinglan-orchid/icons/orchid-180.png"><script defer src="/qinglan-orchid/install-app.js"></script><script id="qinglan-mac-camera-config">(()=>{'use strict';const ua=navigator.userAgent||'';const enabled=/Macintosh|Mac OS X/.test(ua)&&!/iPhone|iPad|iPod/.test(ua)&&(navigator.maxTouchPoints||0)<2;window.QinglanMacCameraConfig=Object.freeze({enabled,native:false,version:"1.1.2"});})();</script><script id="qinglan-mac-camera-selector">/* Mac 1.1.2: visible camera selection; all capture remains in PortalCamera. */
+(() => {
+ 'use strict';
+ const config=window.QinglanMacCameraConfig||{enabled:true,native:true,version:'1.1.2'};
+ if(!config.enabled)return;
+ if(window.QinglanMacCamera)return;
+ function classify(item){
+  const label=item.label||'';
+  if(item.virtual)return '虚拟摄像头';
+  if(/facetime|built[\s_-]*in|integrated|macbook|内置|内建/i.test(label))return '内置摄像头';
+  if(/continuity|iphone|ipad|接续互通/i.test(label))return '接续互通摄像头';
+  if(/\busb\b|\buvc\b|logitech|brio|elgato|外接|c9[0-9]{2}/i.test(label))return '外接摄像头';
+  return label?'摄像头':'授权后显示名称';
+ }
+ function init(){
+  const camera=window.PortalCamera,utilities=document.querySelector('.portal-utilities');
+  if(!camera?.listDevices||!utilities||document.getElementById('macCameraDialog'))return;
+  const style=document.createElement('style');style.id='qinglan-mac-camera-style';style.textContent=`
+  #shellCameraPicker{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:750}
+  #shellCameraPicker svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;flex:none}
+  #macCameraDialog[hidden]{display:none!important}
+  #macCameraDialog{position:fixed;inset:0;z-index:2147483646;background:#102f27b3;display:grid;place-items:center;padding:22px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#173d2f;font-family:'Microsoft YaHei','PingFang SC',sans-serif}
+  #macCameraDialog article{position:relative;width:min(620px,100%);max-height:calc(100vh - 44px);overflow:auto;background:#faf5e7;border:1px solid #d2c8a7;border-radius:23px;padding:32px;box-shadow:0 24px 80px #061d1a66}
+  #macCameraDialog .mac-camera-kicker{margin:0 0 7px;font-size:11px;font-weight:750;letter-spacing:.16em;color:#8b5068}
+  #macCameraDialog h2{margin:0 40px 15px 0;font-size:30px;line-height:1.4;font-weight:800}
+  #macCameraDialog p{font-size:14px;line-height:1.8;font-weight:600;margin:10px 0}
+  #macCameraDialog .mac-current-camera{padding:13px 16px;background:#e3ead7;border:1px solid #c1cdae;border-radius:12px;overflow-wrap:anywhere}
+  #macCameraDialog label{display:block;font-size:15px;line-height:1.6;font-weight:800;margin:20px 0 8px}
+  #macCameraDialog select{display:block;width:100%;min-height:49px;padding:10px 12px;background:#fffdf6;color:#173d2f;border:1px solid #8b9c7c;border-radius:10px;font:650 15px/1.5 'Microsoft YaHei','PingFang SC',sans-serif}
+  #macCameraDialog button{font-family:inherit;font-weight:750;font-size:14px;line-height:1.5;min-height:45px;border:1px solid #294f3c;border-radius:10px;padding:10px 16px;background:#294f3c;color:#fff8e9;cursor:pointer}
+  #macCameraDialog button:disabled{opacity:.55;cursor:wait}
+  #macCameraDialog button.secondary{color:#294f3c;background:#f4f0e2;border-color:#aab79b}
+  #macCameraDialog .mac-camera-buttons{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0 8px}
+  #macCameraDialog .mac-camera-close{position:absolute;top:18px;right:18px;width:38px;min-height:38px;padding:0;font-size:26px;line-height:1;background:transparent;border-color:#b8c3a8;color:#294f3c;border-radius:50%}
+  #macCameraDialog .mac-camera-note{font-size:12px;color:#53664d;margin-top:18px}
+  #macCameraDialog .mac-camera-status{min-height:26px;color:#375b40}
+  #macCameraDialog [role=alert]{color:#8b3e50}
+  #macCameraDialog .mac-camera-version{border-top:1px solid #d3d7c2;padding-top:12px;font-size:11px;color:#65755d;margin-top:20px}
+  #macCameraDialog :focus-visible{outline:3px solid #a66e88;outline-offset:3px}
+  @media(max-width:1000px){#shellCameraPicker{padding-inline:9px;gap:5px}}
+  @media(max-width:720px){#shellCameraPicker{font-size:12px;gap:4px}#shellCameraPicker svg{width:16px;height:16px}}
+  @media(max-width:560px){#macCameraDialog{padding:13px}#macCameraDialog article{padding:25px 20px;max-height:calc(100vh - 26px)}#macCameraDialog h2{font-size:26px}#macCameraDialog .mac-camera-buttons>button{flex:1}}
+  `;document.head.append(style);
+  const button=document.createElement('button');button.id='shellCameraPicker';button.type='button';button.setAttribute('aria-haspopup','dialog');button.setAttribute('aria-controls','macCameraDialog');button.setAttribute('aria-expanded','false');button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h4l1.5-2h5L16 7h4v13H4z"/><circle cx="12" cy="13" r="4"/></svg><span>摄像头</span>';
+  utilities.insertBefore(button,document.getElementById('shellFullscreen')||null);
+  const dialog=document.createElement('div');dialog.id='macCameraDialog';dialog.hidden=true;
+  dialog.innerHTML='<article role="dialog" aria-modal="true" aria-labelledby="macCameraTitle" aria-describedby="macCameraIntro"><button class="mac-camera-close" type="button" aria-label="关闭摄像头设置">×</button><p class="mac-camera-kicker">CHOOSE YOUR CAMERA</p><h2 id="macCameraTitle">选择你的摄像头</h2><p id="macCameraIntro">MacBook Pro 内置镜头，或已连接的外接镜头，都可以在这里选择。</p><p class="mac-current-camera" id="macCameraCurrent">当前尚未开启摄像头。</p><label for="macCameraSelect">使用哪一台镜头</label><select id="macCameraSelect" aria-describedby="macCameraStatus"><option value="">自动选择实体摄像头（推荐）</option></select><div class="mac-camera-buttons"><button type="button" id="macCameraApply">应用摄像头</button><button type="button" class="secondary" id="macCameraRefresh">刷新列表</button></div><div class="mac-camera-buttons"><button type="button" id="macCameraAuthorize">允许并开启摄像头</button><button type="button" class="secondary" id="macCameraStop">停止摄像头</button></div><p id="macCameraStatus" class="mac-camera-status" role="status" aria-live="polite">先允许摄像头，即可查看镜头名称并选择。</p><p class="mac-camera-note">插入 USB 镜头后可刷新列表。只有实际检测到的镜头才会显示。你的选择会保存，三个板块共用同一台摄像头。</p><p class="mac-camera-version">Mac 桌面版 1.1.2 · 画面仅在本机识别，不录制、不上传。</p></article>';
+  document.body.append(dialog);
+  dialog.querySelector('.mac-camera-version').textContent=(config.native?'Mac 桌面版 '+config.version:'Mac 网页体验')+' · 画面仅在本机识别，不录制、不上传。';
+  const dock=document.getElementById('immersiveDock');
+  if(dock){const dockButton=document.createElement('button');dockButton.type='button';dockButton.id='immersiveCameraPicker';dockButton.textContent='摄像头';dockButton.setAttribute('aria-haspopup','dialog');dockButton.setAttribute('aria-controls','macCameraDialog');const exit=[...dock.querySelectorAll('button')].find(item=>!item.dataset.immersiveMode);dock.insertBefore(dockButton,exit||null);dockButton.addEventListener('click',()=>open());}
+  const select=dialog.querySelector('#macCameraSelect'),current=dialog.querySelector('#macCameraCurrent'),message=dialog.querySelector('#macCameraStatus'),apply=dialog.querySelector('#macCameraApply'),refreshButton=dialog.querySelector('#macCameraRefresh'),authorize=dialog.querySelector('#macCameraAuthorize'),stop=dialog.querySelector('#macCameraStop');
+  let editing=false,applying=false,recovering=false,disposed=false,lastFocus=null,recoveryMessage='',operationError='',previousLive=false,previousDevice='',recoveryEpoch=0;
+  function say(text,error=false){message.textContent=text;message.setAttribute('role',error?'alert':'status');}
+  function render(){
+   const state=camera.status(),items=state.devices||[],chosen=editing?select.value:state.preferredDeviceId||'';
+   const signature=JSON.stringify(items.map(item=>[item.deviceId,item.label,item.virtual]));
+   if(select.dataset.signature!==signature){
+    select.replaceChildren();const option=document.createElement('option');option.value='';option.textContent='自动选择实体摄像头（推荐）';select.append(option);
+    items.forEach((item,index)=>{const option=document.createElement('option');option.value=item.deviceId;option.textContent=(item.label||'摄像头 '+(index+1))+' · '+classify(item);select.append(option);});
+    select.dataset.signature=signature;
+   }
+   select.value=[...select.options].some(option=>option.value===chosen)?chosen:'';
+   const shellControl=document.getElementById('shellCamera');
+   const sceneReady=window.QinglanPortal?.status?.().loaded===true&&!!window.QinglanPortal?.selectCameraDevice&&!!shellControl&&(!shellControl.disabled||state.masterLive||state.pending);
+   const busy=applying||recovering||state.pending;
+   apply.disabled=busy||select.options.length===1;refreshButton.disabled=busy;select.disabled=busy;
+   authorize.disabled=busy||state.masterLive||!sceneReady;authorize.textContent=state.pending?'摄像头连接中…':state.masterLive?'摄像头已开启':sceneReady?'允许并开启摄像头':'场景正在准备…';stop.disabled=busy||!state.masterLive;
+   if(state.masterLive)current.textContent='当前：'+(state.cameraLabel||'摄像头已连接')+(state.cameraVirtual?' · 虚拟镜头':'');
+   else current.textContent='当前尚未开启摄像头。'+(state.preferredDeviceId?'已保存镜头选择。':'');
+   if(applying||recovering)return;
+   if(!sceneReady)say('场景正在准备，完成后即可开启摄像头。');
+   else if(state.lastError?.name==='NotAllowedError')say(config.native?'摄像头访问未获允许。请在系统偏好设置 → 安全性与隐私 → 隐私 → 相机中允许清兰，再重新打开应用。':'摄像头访问未获允许。请在 Safari 的“此网站设置”中将摄像头设为允许；同时检查系统相机隐私设置已允许 Safari。若使用其他浏览器，请在该浏览器的网站权限中允许摄像头。',true);
+   else if(operationError)say(operationError,true);
+   else if(recoveryMessage)say(recoveryMessage);
+   else if(state.masterLive)say('已连接。选择另一台镜头并应用，会自动恢复当前手势体验。');
+   else if(!state.permissionKnown||!items.some(item=>item.label))say('先点“允许并开启摄像头”，授权后即可查看内置、USB 或其他镜头名称。');
+   else if(!items.length)say('尚未检测到可用摄像头。请连接镜头，再刷新列表。');
+   else say('已找到 '+items.length+' 台摄像头。可以保存选择，再开启手势。');
+  }
+  async function refresh(){
+   if(disposed)return;
+   try{refreshButton.disabled=true;await camera.listDevices({refresh:true});render();}
+   catch(error){say(error?.message||'无法刷新摄像头列表，请确认系统已允许相机访问。',true);}
+  }
+  function open(){lastFocus=document.activeElement;dialog.hidden=false;button.setAttribute('aria-expanded','true');render();void refresh();dialog.querySelector('.mac-camera-close').focus();}
+  function close(){dialog.hidden=true;button.setAttribute('aria-expanded','false');lastFocus?.focus?.();}
+  button.addEventListener('click',open);dialog.querySelector('.mac-camera-close').addEventListener('click',close);
+  dialog.addEventListener('click',event=>{if(event.target===dialog)close();});
+  dialog.addEventListener('keydown',event=>{
+   if(event.key==='Escape'){event.preventDefault();event.stopPropagation();close();}
+   if(event.key==='Tab'){
+    const focusable=[...dialog.querySelectorAll('button,select')].filter(element=>!element.disabled),first=focusable[0],last=focusable[focusable.length-1];
+    if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+   }
+  });
+  select.addEventListener('change',()=>{editing=true;recoveryMessage='';operationError='';});
+  refreshButton.addEventListener('click',event=>{if(event.isTrusted)void refresh();});
+  authorize.addEventListener('click',event=>{if(!event.isTrusted)return;recoveryEpoch++;recoveryMessage='';operationError='';document.getElementById('shellCamera')?.click();render();});
+  stop.addEventListener('click',event=>{if(!event.isTrusted)return;recoveryEpoch++;recoveryMessage='';operationError='';document.getElementById('shellCamera')?.click();render();});
+  async function applyChoice(value=select.value){
+   if(applying)return;
+   const state=camera.status();if(state.pending){say('相机正在连接，请稍候。');return;}
+   if(!window.QinglanPortal?.selectCameraDevice){say('场景还在准备，请稍后再试。');return;}
+   recoveryEpoch++;operationError='';applying=true;render();say(state.masterLive?'正在切换摄像头并恢复手势…':'正在保存摄像头选择…');
+   try{
+    const result=await window.QinglanPortal.selectCameraDevice(value);editing=false;recoveryMessage='';
+    if(result?.ok===false||result?.state==='error'||result?.state==='unsupported')operationError=result.message||'相机未能开启，请重新选择镜头。';
+   }catch(error){operationError=error?.message||'切换失败，请刷新列表后重新选择。';}
+   finally{applying=false;render();}
+  }
+  apply.addEventListener('click',event=>{if(event.isTrusted)void applyChoice();});
+  async function recoverDisconnected(oldDevice,token){
+   recovering=true;render();say('镜头已断开，正在寻找可用的实体摄像头…');
+   const current=()=>!disposed&&token===recoveryEpoch&&!document.hidden;
+   try{
+    await new Promise(resolve=>setTimeout(resolve,220));
+    if(!current())return;
+    const items=await camera.listDevices({refresh:true});
+    if(!current())return;
+    if(items.some(item=>item.deviceId===oldDevice)){recoveryMessage='摄像头画面已停止。可重新选择镜头并开启。';return;}
+    if(!items.some(item=>item.label&&!item.virtual)){recoveryMessage='当前没有可用的实体摄像头。请连接镜头，再刷新列表。';return;}
+    const result=await window.QinglanPortal.selectCameraDevice('',true);
+    if(!current())return;
+    if(result?.ok===false||result?.state==='error'||result?.state==='unsupported')operationError=result.message||'镜头未能恢复。请重新选择摄像头。';
+    else recoveryMessage=camera.status().masterLive?'原镜头已断开，已切换到 '+(camera.status().cameraLabel||'可用实体镜头')+'。':'已找到可用镜头，请点击开启。';
+   }catch(error){if(current())operationError=error?.message||'镜头未能恢复。请重新选择摄像头。';}
+   finally{recovering=false;render();}
+  }
+  function onState(){
+   const state=camera.status(),wasLive=previousLive,oldDevice=previousDevice;
+   if(/explicit|hidden|pagehide/.test(state.lastStop||'')){recoveryEpoch++;recoveryMessage='';}
+   previousLive=state.masterLive;
+   if(state.masterLive)previousDevice=state.deviceId;
+   const wanted=window.QinglanPortal?.status?.().cameraWanted===true;
+   if(wasLive&&!state.masterLive&&oldDevice&&state.lastStop==='camera-ended'&&state.permissionKnown&&wanted&&!recovering&&!applying&&!document.hidden)void recoverDisconnected(oldDevice,++recoveryEpoch);
+   render();
+  }
+  window.addEventListener('portal-camera-state',onState);
+  window.addEventListener('orchid-mode-change',render);
+  const shellControl=document.getElementById('shellCamera');
+  const readinessObserver=typeof MutationObserver==='function'&&shellControl?new MutationObserver(render):null;
+  if(readinessObserver)readinessObserver.observe(shellControl,{attributes:true,attributeFilter:['disabled']});
+  window.addEventListener('pagehide',()=>{disposed=true;recoveryEpoch++;readinessObserver?.disconnect();});
+  window.QinglanMacCamera=Object.freeze({open,close,refresh,status:()=>({open:!dialog.hidden,applying,recovering,selected:select.value}),classify});
+  render();
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script></head><body><header class="portal-header"><a class="portal-brand" href="/qinglan-orchid/" aria-label="返回作品介绍与下载页"><span aria-hidden="true">兰</span><div><strong>清兰花棚</strong><small>GARDEN · RESEARCH · PLAY</small></div></a><nav class="portal-modes" aria-label="完整体验模式"><button id="modeShop" data-mode="shop" aria-pressed="false">花棚体验</button><button id="modeLab" data-mode="lab" class="active" aria-pressed="true">互动研究所</button><button id="modeBloom" data-mode="bloom" aria-pressed="false">掌心开花</button></nav><div class="portal-utilities"><button id="shellSound" disabled aria-pressed="false">音乐 · 关</button><button id="shellCamera" disabled aria-pressed="false">手势 · 关</button></div></header><main class="portal-stage" id="portalStage"><div class="portal-loading" id="portalLoading"><em>Qinglan.</em><strong id="loadingTitle">正在展开蝴蝶兰研究所</strong><p id="loadingText">图片、动效、音乐与手势组件均已收进这个文件。</p><button id="retryMode" hidden>重新打开当前场景</button></div></main><div class="portal-status" id="portalStatus" role="status" hidden></div><script id="sharedHandAssets" type="application/octet-stream"></script><script id="portalPayload" type="application/octet-stream"></script><script id="gesture-button-confirm">/* Stable strong pinch confirms once. A real open frame is required before another press. */
 (() => {
  'use strict';
  let parentAPI=null;try{if(window.parent!==window)parentAPI=window.parent.GestureButtonConfirm;}catch(_){}
@@ -174,6 +323,7 @@ html.orchid-gloves-right #portalHandPointer{opacity:0!important}
 (() => {
  'use strict';
  if(window.PortalCamera)return;
+ const MAC=window.QinglanMacCameraConfig?.enabled===true;
  const media=navigator.mediaDevices,nativeCapture=media?.getUserMedia?.bind(media),nativeEnumerate=media?.enumerateDevices?.bind(media);
  const leases=[],history=[],opening=new Set(),prepared=new Map(),storageKey='qinglan-camera-device-v1';
  const virtualPattern=/todesk|\bobs\b|virtual|虚拟|screen[\s_-]*(?:capture|camera)/i;
@@ -240,6 +390,14 @@ html.orchid-gloves-right #portalHandPointer{opacity:0!important}
   if(saved)return saved;
   const hardware=devices.filter(item=>item.label&&!item.virtual);
   if(!hardware.length)return null;
+  // A saved explicit choice has already won above. Automatic Mac selection
+  // groups real reported labels; deviceId values are never treated as names.
+  if(MAC){
+   const builtin=hardware.find(item=>/facetime|integrated|built[\s_-]*in|macbook|内置|内建/i.test(item.label));
+   if(builtin)return builtin;
+   const usb=hardware.find(item=>/\busb\b|\buvc\b|logitech|brio|elgato|外接|c9[0-9]{2}/i.test(item.label));
+   if(usb)return usb;
+  }
   const currentDevice=hardware.find(item=>item.deviceId===current.deviceId);
   if(currentDevice)return currentDevice;
   if(current.label&&!current.virtual)return null;
@@ -268,7 +426,7 @@ html.orchid-gloves-right #portalHandPointer{opacity:0!important}
   const requestEpoch=epoch;
   if(pending)return pending.then(()=>{if(requestEpoch!==epoch)throw namedError('AbortError','相机申请已取消。');return cloneFor(owner);});
   if(!nativeCapture)return Promise.reject(namedError('NotSupportedError','此浏览器没有提供摄像头接口。'));
-  if(!trusted())return Promise.reject(namedError('NotAllowedError','请先轻触开启摄像头，并在系统提示中允许；已有画面之后可连续使用手势。'));
+  if(!trusted()&&!(MAC&&permissionKnown))return Promise.reject(namedError('NotAllowedError','请先轻触开启摄像头，并在系统提示中允许；已有画面之后可连续使用手势。'));
   lastError=null;
   const request=openCapture(constraints,requestEpoch).catch(error=>{lastError={name:error?.name||'Error',message:String(error?.message||error)};for(const stream of opening)end(stream);opening.clear();throw error;}).finally(()=>{if(pending===request)pending=null;notify();});
   pending=request;return request.then(()=>cloneFor(owner));
@@ -283,38 +441,181 @@ html.orchid-gloves-right #portalHandPointer{opacity:0!important}
  window.PortalCamera=Object.freeze({acquire,prepare,releasePrepared,stop,onChildStop,status,listDevices,selectDevice});
 })();
 </script><script id="offline-inflate">!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{("undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this).pako=e()}}(function(){return function r(o,s,f){function l(t,e){if(!s[t]){if(!o[t]){var i="function"==typeof require&&require;if(!e&&i)return i(t,!0);if(d)return d(t,!0);var n=new Error("Cannot find module '"+t+"'");throw n.code="MODULE_NOT_FOUND",n}var a=s[t]={exports:{}};o[t][0].call(a.exports,function(e){return l(o[t][1][e]||e)},a,a.exports,r,o,s,f)}return s[t].exports}for(var d="function"==typeof require&&require,e=0;e<f.length;e++)l(f[e]);return l}({1:[function(e,t,i){"use strict";var n="undefined"!=typeof Uint8Array&&"undefined"!=typeof Uint16Array&&"undefined"!=typeof Int32Array;i.assign=function(e){for(var t,i,n=Array.prototype.slice.call(arguments,1);n.length;){var a=n.shift();if(a){if("object"!=typeof a)throw new TypeError(a+"must be non-object");for(var r in a)t=a,i=r,Object.prototype.hasOwnProperty.call(t,i)&&(e[r]=a[r])}}return e},i.shrinkBuf=function(e,t){return e.length===t?e:e.subarray?e.subarray(0,t):(e.length=t,e)};var a={arraySet:function(e,t,i,n,a){if(t.subarray&&e.subarray)e.set(t.subarray(i,i+n),a);else for(var r=0;r<n;r++)e[a+r]=t[i+r]},flattenChunks:function(e){var t,i,n,a,r,o;for(t=n=0,i=e.length;t<i;t++)n+=e[t].length;for(o=new Uint8Array(n),t=a=0,i=e.length;t<i;t++)r=e[t],o.set(r,a),a+=r.length;return o}},r={arraySet:function(e,t,i,n,a){for(var r=0;r<n;r++)e[a+r]=t[i+r]},flattenChunks:function(e){return[].concat.apply([],e)}};i.setTyped=function(e){e?(i.Buf8=Uint8Array,i.Buf16=Uint16Array,i.Buf32=Int32Array,i.assign(i,a)):(i.Buf8=Array,i.Buf16=Array,i.Buf32=Array,i.assign(i,r))},i.setTyped(n)},{}],2:[function(e,t,i){"use strict";var f=e("./common"),a=!0,r=!0;try{String.fromCharCode.apply(null,[0])}catch(e){a=!1}try{String.fromCharCode.apply(null,new Uint8Array(1))}catch(e){r=!1}for(var l=new f.Buf8(256),n=0;n<256;n++)l[n]=252<=n?6:248<=n?5:240<=n?4:224<=n?3:192<=n?2:1;function d(e,t){if(t<65534&&(e.subarray&&r||!e.subarray&&a))return String.fromCharCode.apply(null,f.shrinkBuf(e,t));for(var i="",n=0;n<t;n++)i+=String.fromCharCode(e[n]);return i}l[254]=l[254]=1,i.string2buf=function(e){var t,i,n,a,r,o=e.length,s=0;for(a=0;a<o;a++)55296==(64512&(i=e.charCodeAt(a)))&&a+1<o&&56320==(64512&(n=e.charCodeAt(a+1)))&&(i=65536+(i-55296<<10)+(n-56320),a++),s+=i<128?1:i<2048?2:i<65536?3:4;for(t=new f.Buf8(s),a=r=0;r<s;a++)55296==(64512&(i=e.charCodeAt(a)))&&a+1<o&&56320==(64512&(n=e.charCodeAt(a+1)))&&(i=65536+(i-55296<<10)+(n-56320),a++),i<128?t[r++]=i:(i<2048?t[r++]=192|i>>>6:(i<65536?t[r++]=224|i>>>12:(t[r++]=240|i>>>18,t[r++]=128|i>>>12&63),t[r++]=128|i>>>6&63),t[r++]=128|63&i);return t},i.buf2binstring=function(e){return d(e,e.length)},i.binstring2buf=function(e){for(var t=new f.Buf8(e.length),i=0,n=t.length;i<n;i++)t[i]=e.charCodeAt(i);return t},i.buf2string=function(e,t){var i,n,a,r,o=t||e.length,s=new Array(2*o);for(i=n=0;i<o;)if((a=e[i++])<128)s[n++]=a;else if(4<(r=l[a]))s[n++]=65533,i+=r-1;else{for(a&=2===r?31:3===r?15:7;1<r&&i<o;)a=a<<6|63&e[i++],r--;1<r?s[n++]=65533:a<65536?s[n++]=a:(a-=65536,s[n++]=55296|a>>10&1023,s[n++]=56320|1023&a)}return d(s,n)},i.utf8border=function(e,t){var i;for((t=t||e.length)>e.length&&(t=e.length),i=t-1;0<=i&&128==(192&e[i]);)i--;return i<0?t:0===i?t:i+l[e[i]]>t?i:t}},{"./common":1}],3:[function(e,t,i){"use strict";t.exports=function(e,t,i,n){for(var a=65535&e|0,r=e>>>16&65535|0,o=0;0!==i;){for(i-=o=2e3<i?2e3:i;r=r+(a=a+t[n++]|0)|0,--o;);a%=65521,r%=65521}return a|r<<16|0}},{}],4:[function(e,t,i){"use strict";t.exports={Z_NO_FLUSH:0,Z_PARTIAL_FLUSH:1,Z_SYNC_FLUSH:2,Z_FULL_FLUSH:3,Z_FINISH:4,Z_BLOCK:5,Z_TREES:6,Z_OK:0,Z_STREAM_END:1,Z_NEED_DICT:2,Z_ERRNO:-1,Z_STREAM_ERROR:-2,Z_DATA_ERROR:-3,Z_BUF_ERROR:-5,Z_NO_COMPRESSION:0,Z_BEST_SPEED:1,Z_BEST_COMPRESSION:9,Z_DEFAULT_COMPRESSION:-1,Z_FILTERED:1,Z_HUFFMAN_ONLY:2,Z_RLE:3,Z_FIXED:4,Z_DEFAULT_STRATEGY:0,Z_BINARY:0,Z_TEXT:1,Z_UNKNOWN:2,Z_DEFLATED:8}},{}],5:[function(e,t,i){"use strict";var s=function(){for(var e,t=[],i=0;i<256;i++){e=i;for(var n=0;n<8;n++)e=1&e?3988292384^e>>>1:e>>>1;t[i]=e}return t}();t.exports=function(e,t,i,n){var a=s,r=n+i;e^=-1;for(var o=n;o<r;o++)e=e>>>8^a[255&(e^t[o])];return-1^e}},{}],6:[function(e,t,i){"use strict";t.exports=function(){this.text=0,this.time=0,this.xflags=0,this.os=0,this.extra=null,this.extra_len=0,this.name="",this.comment="",this.hcrc=0,this.done=!1}},{}],7:[function(e,t,i){"use strict";t.exports=function(e,t){var i,n,a,r,o,s,f,l,d,c,u,h,b,m,w,k,_,g,v,p,x,y,S,E,Z;i=e.state,n=e.next_in,E=e.input,a=n+(e.avail_in-5),r=e.next_out,Z=e.output,o=r-(t-e.avail_out),s=r+(e.avail_out-257),f=i.dmax,l=i.wsize,d=i.whave,c=i.wnext,u=i.window,h=i.hold,b=i.bits,m=i.lencode,w=i.distcode,k=(1<<i.lenbits)-1,_=(1<<i.distbits)-1;e:do{b<15&&(h+=E[n++]<<b,b+=8,h+=E[n++]<<b,b+=8),g=m[h&k];t:for(;;){if(h>>>=v=g>>>24,b-=v,0===(v=g>>>16&255))Z[r++]=65535&g;else{if(!(16&v)){if(0==(64&v)){g=m[(65535&g)+(h&(1<<v)-1)];continue t}if(32&v){i.mode=12;break e}e.msg="invalid literal/length code",i.mode=30;break e}p=65535&g,(v&=15)&&(b<v&&(h+=E[n++]<<b,b+=8),p+=h&(1<<v)-1,h>>>=v,b-=v),b<15&&(h+=E[n++]<<b,b+=8,h+=E[n++]<<b,b+=8),g=w[h&_];i:for(;;){if(h>>>=v=g>>>24,b-=v,!(16&(v=g>>>16&255))){if(0==(64&v)){g=w[(65535&g)+(h&(1<<v)-1)];continue i}e.msg="invalid distance code",i.mode=30;break e}if(x=65535&g,b<(v&=15)&&(h+=E[n++]<<b,(b+=8)<v&&(h+=E[n++]<<b,b+=8)),f<(x+=h&(1<<v)-1)){e.msg="invalid distance too far back",i.mode=30;break e}if(h>>>=v,b-=v,(v=r-o)<x){if(d<(v=x-v)&&i.sane){e.msg="invalid distance too far back",i.mode=30;break e}if(S=u,(y=0)===c){if(y+=l-v,v<p){for(p-=v;Z[r++]=u[y++],--v;);y=r-x,S=Z}}else if(c<v){if(y+=l+c-v,(v-=c)<p){for(p-=v;Z[r++]=u[y++],--v;);if(y=0,c<p){for(p-=v=c;Z[r++]=u[y++],--v;);y=r-x,S=Z}}}else if(y+=c-v,v<p){for(p-=v;Z[r++]=u[y++],--v;);y=r-x,S=Z}for(;2<p;)Z[r++]=S[y++],Z[r++]=S[y++],Z[r++]=S[y++],p-=3;p&&(Z[r++]=S[y++],1<p&&(Z[r++]=S[y++]))}else{for(y=r-x;Z[r++]=Z[y++],Z[r++]=Z[y++],Z[r++]=Z[y++],2<(p-=3););p&&(Z[r++]=Z[y++],1<p&&(Z[r++]=Z[y++]))}break}}break}}while(n<a&&r<s);n-=p=b>>3,h&=(1<<(b-=p<<3))-1,e.next_in=n,e.next_out=r,e.avail_in=n<a?a-n+5:5-(n-a),e.avail_out=r<s?s-r+257:257-(r-s),i.hold=h,i.bits=b}},{}],8:[function(e,t,i){"use strict";var z=e("../utils/common"),R=e("./adler32"),N=e("./crc32"),O=e("./inffast"),C=e("./inftrees"),I=1,D=2,T=0,U=-2,F=1,n=852,a=592;function L(e){return(e>>>24&255)+(e>>>8&65280)+((65280&e)<<8)+((255&e)<<24)}function r(){this.mode=0,this.last=!1,this.wrap=0,this.havedict=!1,this.flags=0,this.dmax=0,this.check=0,this.total=0,this.head=null,this.wbits=0,this.wsize=0,this.whave=0,this.wnext=0,this.window=null,this.hold=0,this.bits=0,this.length=0,this.offset=0,this.extra=0,this.lencode=null,this.distcode=null,this.lenbits=0,this.distbits=0,this.ncode=0,this.nlen=0,this.ndist=0,this.have=0,this.next=null,this.lens=new z.Buf16(320),this.work=new z.Buf16(288),this.lendyn=null,this.distdyn=null,this.sane=0,this.back=0,this.was=0}function o(e){var t;return e&&e.state?(t=e.state,e.total_in=e.total_out=t.total=0,e.msg="",t.wrap&&(e.adler=1&t.wrap),t.mode=F,t.last=0,t.havedict=0,t.dmax=32768,t.head=null,t.hold=0,t.bits=0,t.lencode=t.lendyn=new z.Buf32(n),t.distcode=t.distdyn=new z.Buf32(a),t.sane=1,t.back=-1,T):U}function s(e){var t;return e&&e.state?((t=e.state).wsize=0,t.whave=0,t.wnext=0,o(e)):U}function f(e,t){var i,n;return e&&e.state?(n=e.state,t<0?(i=0,t=-t):(i=1+(t>>4),t<48&&(t&=15)),t&&(t<8||15<t)?U:(null!==n.window&&n.wbits!==t&&(n.window=null),n.wrap=i,n.wbits=t,s(e))):U}function l(e,t){var i,n;return e?(n=new r,(e.state=n).window=null,(i=f(e,t))!==T&&(e.state=null),i):U}var d,c,u=!0;function H(e){if(u){var t;for(d=new z.Buf32(512),c=new z.Buf32(32),t=0;t<144;)e.lens[t++]=8;for(;t<256;)e.lens[t++]=9;for(;t<280;)e.lens[t++]=7;for(;t<288;)e.lens[t++]=8;for(C(I,e.lens,0,288,d,0,e.work,{bits:9}),t=0;t<32;)e.lens[t++]=5;C(D,e.lens,0,32,c,0,e.work,{bits:5}),u=!1}e.lencode=d,e.lenbits=9,e.distcode=c,e.distbits=5}function j(e,t,i,n){var a,r=e.state;return null===r.window&&(r.wsize=1<<r.wbits,r.wnext=0,r.whave=0,r.window=new z.Buf8(r.wsize)),n>=r.wsize?(z.arraySet(r.window,t,i-r.wsize,r.wsize,0),r.wnext=0,r.whave=r.wsize):(n<(a=r.wsize-r.wnext)&&(a=n),z.arraySet(r.window,t,i-n,a,r.wnext),(n-=a)?(z.arraySet(r.window,t,i-n,n,0),r.wnext=n,r.whave=r.wsize):(r.wnext+=a,r.wnext===r.wsize&&(r.wnext=0),r.whave<r.wsize&&(r.whave+=a))),0}i.inflateReset=s,i.inflateReset2=f,i.inflateResetKeep=o,i.inflateInit=function(e){return l(e,15)},i.inflateInit2=l,i.inflate=function(e,t){var i,n,a,r,o,s,f,l,d,c,u,h,b,m,w,k,_,g,v,p,x,y,S,E,Z=0,B=new z.Buf8(4),A=[16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];if(!e||!e.state||!e.output||!e.input&&0!==e.avail_in)return U;12===(i=e.state).mode&&(i.mode=13),o=e.next_out,a=e.output,f=e.avail_out,r=e.next_in,n=e.input,s=e.avail_in,l=i.hold,d=i.bits,c=s,u=f,y=T;e:for(;;)switch(i.mode){case F:if(0===i.wrap){i.mode=13;break}for(;d<16;){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}if(2&i.wrap&&35615===l){B[i.check=0]=255&l,B[1]=l>>>8&255,i.check=N(i.check,B,2,0),d=l=0,i.mode=2;break}if(i.flags=0,i.head&&(i.head.done=!1),!(1&i.wrap)||(((255&l)<<8)+(l>>8))%31){e.msg="incorrect header check",i.mode=30;break}if(8!=(15&l)){e.msg="unknown compression method",i.mode=30;break}if(d-=4,x=8+(15&(l>>>=4)),0===i.wbits)i.wbits=x;else if(x>i.wbits){e.msg="invalid window size",i.mode=30;break}i.dmax=1<<x,e.adler=i.check=1,i.mode=512&l?10:12,d=l=0;break;case 2:for(;d<16;){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}if(i.flags=l,8!=(255&i.flags)){e.msg="unknown compression method",i.mode=30;break}if(57344&i.flags){e.msg="unknown header flags set",i.mode=30;break}i.head&&(i.head.text=l>>8&1),512&i.flags&&(B[0]=255&l,B[1]=l>>>8&255,i.check=N(i.check,B,2,0)),d=l=0,i.mode=3;case 3:for(;d<32;){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}i.head&&(i.head.time=l),512&i.flags&&(B[0]=255&l,B[1]=l>>>8&255,B[2]=l>>>16&255,B[3]=l>>>24&255,i.check=N(i.check,B,4,0)),d=l=0,i.mode=4;case 4:for(;d<16;){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}i.head&&(i.head.xflags=255&l,i.head.os=l>>8),512&i.flags&&(B[0]=255&l,B[1]=l>>>8&255,i.check=N(i.check,B,2,0)),d=l=0,i.mode=5;case 5:if(1024&i.flags){for(;d<16;){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}i.length=l,i.head&&(i.head.extra_len=l),512&i.flags&&(B[0]=255&l,B[1]=l>>>8&255,i.check=N(i.check,B,2,0)),d=l=0}else i.head&&(i.head.extra=null);i.mode=6;case 6:if(1024&i.flags&&(s<(h=i.length)&&(h=s),h&&(i.head&&(x=i.head.extra_len-i.length,i.head.extra||(i.head.extra=new Array(i.head.extra_len)),z.arraySet(i.head.extra,n,r,h,x)),512&i.flags&&(i.check=N(i.check,n,h,r)),s-=h,r+=h,i.length-=h),i.length))break e;i.length=0,i.mode=7;case 7:if(2048&i.flags){if(0===s)break e;for(h=0;x=n[r+h++],i.head&&x&&i.length<65536&&(i.head.name+=String.fromCharCode(x)),x&&h<s;);if(512&i.flags&&(i.check=N(i.check,n,h,r)),s-=h,r+=h,x)break e}else i.head&&(i.head.name=null);i.length=0,i.mode=8;case 8:if(4096&i.flags){if(0===s)break e;for(h=0;x=n[r+h++],i.head&&x&&i.length<65536&&(i.head.comment+=String.fromCharCode(x)),x&&h<s;);if(512&i.flags&&(i.check=N(i.check,n,h,r)),s-=h,r+=h,x)break e}else i.head&&(i.head.comment=null);i.mode=9;case 9:if(512&i.flags){for(;d<16;){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}if(l!==(65535&i.check)){e.msg="header crc mismatch",i.mode=30;break}d=l=0}i.head&&(i.head.hcrc=i.flags>>9&1,i.head.done=!0),e.adler=i.check=0,i.mode=12;break;case 10:for(;d<32;){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}e.adler=i.check=L(l),d=l=0,i.mode=11;case 11:if(0===i.havedict)return e.next_out=o,e.avail_out=f,e.next_in=r,e.avail_in=s,i.hold=l,i.bits=d,2;e.adler=i.check=1,i.mode=12;case 12:if(5===t||6===t)break e;case 13:if(i.last){l>>>=7&d,d-=7&d,i.mode=27;break}for(;d<3;){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}switch(i.last=1&l,d-=1,3&(l>>>=1)){case 0:i.mode=14;break;case 1:if(H(i),i.mode=20,6!==t)break;l>>>=2,d-=2;break e;case 2:i.mode=17;break;case 3:e.msg="invalid block type",i.mode=30}l>>>=2,d-=2;break;case 14:for(l>>>=7&d,d-=7&d;d<32;){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}if((65535&l)!=(l>>>16^65535)){e.msg="invalid stored block lengths",i.mode=30;break}if(i.length=65535&l,d=l=0,i.mode=15,6===t)break e;case 15:i.mode=16;case 16:if(h=i.length){if(s<h&&(h=s),f<h&&(h=f),0===h)break e;z.arraySet(a,n,r,h,o),s-=h,r+=h,f-=h,o+=h,i.length-=h;break}i.mode=12;break;case 17:for(;d<14;){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}if(i.nlen=257+(31&l),l>>>=5,d-=5,i.ndist=1+(31&l),l>>>=5,d-=5,i.ncode=4+(15&l),l>>>=4,d-=4,286<i.nlen||30<i.ndist){e.msg="too many length or distance symbols",i.mode=30;break}i.have=0,i.mode=18;case 18:for(;i.have<i.ncode;){for(;d<3;){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}i.lens[A[i.have++]]=7&l,l>>>=3,d-=3}for(;i.have<19;)i.lens[A[i.have++]]=0;if(i.lencode=i.lendyn,i.lenbits=7,S={bits:i.lenbits},y=C(0,i.lens,0,19,i.lencode,0,i.work,S),i.lenbits=S.bits,y){e.msg="invalid code lengths set",i.mode=30;break}i.have=0,i.mode=19;case 19:for(;i.have<i.nlen+i.ndist;){for(;k=(Z=i.lencode[l&(1<<i.lenbits)-1])>>>16&255,_=65535&Z,!((w=Z>>>24)<=d);){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}if(_<16)l>>>=w,d-=w,i.lens[i.have++]=_;else{if(16===_){for(E=w+2;d<E;){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}if(l>>>=w,d-=w,0===i.have){e.msg="invalid bit length repeat",i.mode=30;break}x=i.lens[i.have-1],h=3+(3&l),l>>>=2,d-=2}else if(17===_){for(E=w+3;d<E;){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}d-=w,x=0,h=3+(7&(l>>>=w)),l>>>=3,d-=3}else{for(E=w+7;d<E;){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}d-=w,x=0,h=11+(127&(l>>>=w)),l>>>=7,d-=7}if(i.have+h>i.nlen+i.ndist){e.msg="invalid bit length repeat",i.mode=30;break}for(;h--;)i.lens[i.have++]=x}}if(30===i.mode)break;if(0===i.lens[256]){e.msg="invalid code -- missing end-of-block",i.mode=30;break}if(i.lenbits=9,S={bits:i.lenbits},y=C(I,i.lens,0,i.nlen,i.lencode,0,i.work,S),i.lenbits=S.bits,y){e.msg="invalid literal/lengths set",i.mode=30;break}if(i.distbits=6,i.distcode=i.distdyn,S={bits:i.distbits},y=C(D,i.lens,i.nlen,i.ndist,i.distcode,0,i.work,S),i.distbits=S.bits,y){e.msg="invalid distances set",i.mode=30;break}if(i.mode=20,6===t)break e;case 20:i.mode=21;case 21:if(6<=s&&258<=f){e.next_out=o,e.avail_out=f,e.next_in=r,e.avail_in=s,i.hold=l,i.bits=d,O(e,u),o=e.next_out,a=e.output,f=e.avail_out,r=e.next_in,n=e.input,s=e.avail_in,l=i.hold,d=i.bits,12===i.mode&&(i.back=-1);break}for(i.back=0;k=(Z=i.lencode[l&(1<<i.lenbits)-1])>>>16&255,_=65535&Z,!((w=Z>>>24)<=d);){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}if(k&&0==(240&k)){for(g=w,v=k,p=_;k=(Z=i.lencode[p+((l&(1<<g+v)-1)>>g)])>>>16&255,_=65535&Z,!(g+(w=Z>>>24)<=d);){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}l>>>=g,d-=g,i.back+=g}if(l>>>=w,d-=w,i.back+=w,i.length=_,0===k){i.mode=26;break}if(32&k){i.back=-1,i.mode=12;break}if(64&k){e.msg="invalid literal/length code",i.mode=30;break}i.extra=15&k,i.mode=22;case 22:if(i.extra){for(E=i.extra;d<E;){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}i.length+=l&(1<<i.extra)-1,l>>>=i.extra,d-=i.extra,i.back+=i.extra}i.was=i.length,i.mode=23;case 23:for(;k=(Z=i.distcode[l&(1<<i.distbits)-1])>>>16&255,_=65535&Z,!((w=Z>>>24)<=d);){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}if(0==(240&k)){for(g=w,v=k,p=_;k=(Z=i.distcode[p+((l&(1<<g+v)-1)>>g)])>>>16&255,_=65535&Z,!(g+(w=Z>>>24)<=d);){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}l>>>=g,d-=g,i.back+=g}if(l>>>=w,d-=w,i.back+=w,64&k){e.msg="invalid distance code",i.mode=30;break}i.offset=_,i.extra=15&k,i.mode=24;case 24:if(i.extra){for(E=i.extra;d<E;){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}i.offset+=l&(1<<i.extra)-1,l>>>=i.extra,d-=i.extra,i.back+=i.extra}if(i.offset>i.dmax){e.msg="invalid distance too far back",i.mode=30;break}i.mode=25;case 25:if(0===f)break e;if(h=u-f,i.offset>h){if((h=i.offset-h)>i.whave&&i.sane){e.msg="invalid distance too far back",i.mode=30;break}h>i.wnext?(h-=i.wnext,b=i.wsize-h):b=i.wnext-h,h>i.length&&(h=i.length),m=i.window}else m=a,b=o-i.offset,h=i.length;for(f<h&&(h=f),f-=h,i.length-=h;a[o++]=m[b++],--h;);0===i.length&&(i.mode=21);break;case 26:if(0===f)break e;a[o++]=i.length,f--,i.mode=21;break;case 27:if(i.wrap){for(;d<32;){if(0===s)break e;s--,l|=n[r++]<<d,d+=8}if(u-=f,e.total_out+=u,i.total+=u,u&&(e.adler=i.check=i.flags?N(i.check,a,u,o-u):R(i.check,a,u,o-u)),u=f,(i.flags?l:L(l))!==i.check){e.msg="incorrect data check",i.mode=30;break}d=l=0}i.mode=28;case 28:if(i.wrap&&i.flags){for(;d<32;){if(0===s)break e;s--,l+=n[r++]<<d,d+=8}if(l!==(4294967295&i.total)){e.msg="incorrect length check",i.mode=30;break}d=l=0}i.mode=29;case 29:y=1;break e;case 30:y=-3;break e;case 31:return-4;case 32:default:return U}return e.next_out=o,e.avail_out=f,e.next_in=r,e.avail_in=s,i.hold=l,i.bits=d,(i.wsize||u!==e.avail_out&&i.mode<30&&(i.mode<27||4!==t))&&j(e,e.output,e.next_out,u-e.avail_out)?(i.mode=31,-4):(c-=e.avail_in,u-=e.avail_out,e.total_in+=c,e.total_out+=u,i.total+=u,i.wrap&&u&&(e.adler=i.check=i.flags?N(i.check,a,u,e.next_out-u):R(i.check,a,u,e.next_out-u)),e.data_type=i.bits+(i.last?64:0)+(12===i.mode?128:0)+(20===i.mode||15===i.mode?256:0),(0===c&&0===u||4===t)&&y===T&&(y=-5),y)},i.inflateEnd=function(e){if(!e||!e.state)return U;var t=e.state;return t.window&&(t.window=null),e.state=null,T},i.inflateGetHeader=function(e,t){var i;return e&&e.state?0==(2&(i=e.state).wrap)?U:((i.head=t).done=!1,T):U},i.inflateSetDictionary=function(e,t){var i,n=t.length;return e&&e.state?0!==(i=e.state).wrap&&11!==i.mode?U:11===i.mode&&R(1,t,n,0)!==i.check?-3:j(e,t,n,n)?(i.mode=31,-4):(i.havedict=1,T):U},i.inflateInfo="pako inflate (from Nodeca project)"},{"../utils/common":1,"./adler32":3,"./crc32":5,"./inffast":7,"./inftrees":9}],9:[function(e,t,i){"use strict";var I=e("../utils/common"),D=[3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258,0,0],T=[16,16,16,16,16,16,16,16,17,17,17,17,18,18,18,18,19,19,19,19,20,20,20,20,21,21,21,21,16,72,78],U=[1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577,0,0],F=[16,16,16,16,17,17,18,18,19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,27,27,28,28,29,29,64,64];t.exports=function(e,t,i,n,a,r,o,s){var f,l,d,c,u,h,b,m,w,k=s.bits,_=0,g=0,v=0,p=0,x=0,y=0,S=0,E=0,Z=0,B=0,A=null,z=0,R=new I.Buf16(16),N=new I.Buf16(16),O=null,C=0;for(_=0;_<=15;_++)R[_]=0;for(g=0;g<n;g++)R[t[i+g]]++;for(x=k,p=15;1<=p&&0===R[p];p--);if(p<x&&(x=p),0===p)return a[r++]=20971520,a[r++]=20971520,s.bits=1,0;for(v=1;v<p&&0===R[v];v++);for(x<v&&(x=v),_=E=1;_<=15;_++)if(E<<=1,(E-=R[_])<0)return-1;if(0<E&&(0===e||1!==p))return-1;for(N[1]=0,_=1;_<15;_++)N[_+1]=N[_]+R[_];for(g=0;g<n;g++)0!==t[i+g]&&(o[N[t[i+g]]++]=g);if(0===e?(A=O=o,h=19):1===e?(A=D,z-=257,O=T,C-=257,h=256):(A=U,O=F,h=-1),_=v,u=r,S=g=B=0,d=-1,c=(Z=1<<(y=x))-1,1===e&&852<Z||2===e&&592<Z)return 1;for(;;){for(b=_-S,o[g]<h?(m=0,w=o[g]):o[g]>h?(m=O[C+o[g]],w=A[z+o[g]]):(m=96,w=0),f=1<<_-S,v=l=1<<y;a[u+(B>>S)+(l-=f)]=b<<24|m<<16|w|0,0!==l;);for(f=1<<_-1;B&f;)f>>=1;if(0!==f?(B&=f-1,B+=f):B=0,g++,0==--R[_]){if(_===p)break;_=t[i+o[g]]}if(x<_&&(B&c)!==d){for(0===S&&(S=x),u+=v,E=1<<(y=_-S);y+S<p&&!((E-=R[y+S])<=0);)y++,E<<=1;if(Z+=1<<y,1===e&&852<Z||2===e&&592<Z)return 1;a[d=B&c]=x<<24|y<<16|u-r|0}}return 0!==B&&(a[u+B]=_-S<<24|64<<16|0),s.bits=x,0}},{"../utils/common":1}],10:[function(e,t,i){"use strict";t.exports={2:"need dictionary",1:"stream end",0:"","-1":"file error","-2":"stream error","-3":"data error","-4":"insufficient memory","-5":"buffer error","-6":"incompatible version"}},{}],11:[function(e,t,i){"use strict";t.exports=function(){this.input=null,this.next_in=0,this.avail_in=0,this.total_in=0,this.output=null,this.next_out=0,this.avail_out=0,this.total_out=0,this.msg="",this.state=null,this.data_type=2,this.adler=0}},{}],"/lib/inflate.js":[function(e,t,i){"use strict";var c=e("./zlib/inflate"),u=e("./utils/common"),h=e("./utils/strings"),b=e("./zlib/constants"),n=e("./zlib/messages"),a=e("./zlib/zstream"),r=e("./zlib/gzheader"),m=Object.prototype.toString;function o(e){if(!(this instanceof o))return new o(e);this.options=u.assign({chunkSize:16384,windowBits:0,to:""},e||{});var t=this.options;t.raw&&0<=t.windowBits&&t.windowBits<16&&(t.windowBits=-t.windowBits,0===t.windowBits&&(t.windowBits=-15)),!(0<=t.windowBits&&t.windowBits<16)||e&&e.windowBits||(t.windowBits+=32),15<t.windowBits&&t.windowBits<48&&0==(15&t.windowBits)&&(t.windowBits|=15),this.err=0,this.msg="",this.ended=!1,this.chunks=[],this.strm=new a,this.strm.avail_out=0;var i=c.inflateInit2(this.strm,t.windowBits);if(i!==b.Z_OK)throw new Error(n[i]);if(this.header=new r,c.inflateGetHeader(this.strm,this.header),t.dictionary&&("string"==typeof t.dictionary?t.dictionary=h.string2buf(t.dictionary):"[object ArrayBuffer]"===m.call(t.dictionary)&&(t.dictionary=new Uint8Array(t.dictionary)),t.raw&&(i=c.inflateSetDictionary(this.strm,t.dictionary))!==b.Z_OK))throw new Error(n[i])}function s(e,t){var i=new o(t);if(i.push(e,!0),i.err)throw i.msg||n[i.err];return i.result}o.prototype.push=function(e,t){var i,n,a,r,o,s=this.strm,f=this.options.chunkSize,l=this.options.dictionary,d=!1;if(this.ended)return!1;n=t===~~t?t:!0===t?b.Z_FINISH:b.Z_NO_FLUSH,"string"==typeof e?s.input=h.binstring2buf(e):"[object ArrayBuffer]"===m.call(e)?s.input=new Uint8Array(e):s.input=e,s.next_in=0,s.avail_in=s.input.length;do{if(0===s.avail_out&&(s.output=new u.Buf8(f),s.next_out=0,s.avail_out=f),(i=c.inflate(s,b.Z_NO_FLUSH))===b.Z_NEED_DICT&&l&&(i=c.inflateSetDictionary(this.strm,l)),i===b.Z_BUF_ERROR&&!0===d&&(i=b.Z_OK,d=!1),i!==b.Z_STREAM_END&&i!==b.Z_OK)return this.onEnd(i),!(this.ended=!0);s.next_out&&(0!==s.avail_out&&i!==b.Z_STREAM_END&&(0!==s.avail_in||n!==b.Z_FINISH&&n!==b.Z_SYNC_FLUSH)||("string"===this.options.to?(a=h.utf8border(s.output,s.next_out),r=s.next_out-a,o=h.buf2string(s.output,a),s.next_out=r,s.avail_out=f-r,r&&u.arraySet(s.output,s.output,a,r,0),this.onData(o)):this.onData(u.shrinkBuf(s.output,s.next_out)))),0===s.avail_in&&0===s.avail_out&&(d=!0)}while((0<s.avail_in||0===s.avail_out)&&i!==b.Z_STREAM_END);return i===b.Z_STREAM_END&&(n=b.Z_FINISH),n===b.Z_FINISH?(i=c.inflateEnd(this.strm),this.onEnd(i),this.ended=!0,i===b.Z_OK):n!==b.Z_SYNC_FLUSH||(this.onEnd(b.Z_OK),!(s.avail_out=0))},o.prototype.onData=function(e){this.chunks.push(e)},o.prototype.onEnd=function(e){e===b.Z_OK&&("string"===this.options.to?this.result=this.chunks.join(""):this.result=u.flattenChunks(this.chunks)),this.chunks=[],this.err=e,this.msg=this.strm.msg},i.Inflate=o,i.inflate=s,i.inflateRaw=function(e,t){return(t=t||{}).raw=!0,s(e,t)},i.ungzip=s},{"./utils/common":1,"./utils/strings":2,"./zlib/constants":4,"./zlib/gzheader":6,"./zlib/inflate":8,"./zlib/messages":10,"./zlib/zstream":11}]},{},[])("/lib/inflate.js")});
-</script><script id="offline-boot">/* The same scene data and media, delivered as individually cached same-origin files. */
-window.OrchidBoot=(async()=>{
- await(window.OrchidPerformance?.ready||Promise.resolve());
- const META="/qinglan-orchid/assets/experience/scene-index-91c540b54a6ba9ec.json", pending=new Map();
- async function read(url,kind){
-  let error;
-  for(let attempt=0;attempt<2;attempt++){
-   const controller=typeof AbortController==='function'?new AbortController():null;
-   const timer=controller?setTimeout(()=>controller.abort(),20000):null;
-   try{const response=await fetch(url,{credentials:'same-origin',cache:attempt?'reload':'force-cache',signal:controller?.signal});if(!response.ok)throw new Error('资源读取失败（'+response.status+'）');return kind==='json'?await response.json():await response.text();}
-   catch(e){error=e;if(attempt===0)await new Promise(resolve=>setTimeout(resolve,300));}
-   finally{if(timer)clearTimeout(timer);}
-  }
-  throw new Error('网络较慢，场景资源尚未完整载入。请点击重试。'+(error?.name==='AbortError'?'':String(error?.message||'')));
+</script><script id="offline-boot">/* Same scene content, with bounded retries and observable weak-network loading. */
+(function (config) {
+ 'use strict';
+ var pending = new Map(), progress = new Map(), diagnostics = [], parsedSources = {}, phase = 'metadata', handListeners = new Set();
+ var STALL_MS = 30000, TOTAL_MS = 180000, ATTEMPTS = 3;
+ function byId(id) { return document.getElementById(id); }
+ function note(message) { var node = byId('loadingText'); if (node) node.textContent = message; }
+ function issue(code, message, status) { var error = new Error(message); error.resourceCode = code; error.httpStatus = status || null; return error; }
+ function record(type, details) { diagnostics.push(Object.assign({ type: type, at: Math.round(performance.now()) }, details || {})); if (diagnostics.length > 100) diagnostics.shift(); }
+ function failure(error) {
+  if (error && error.resourceCode) return error;
+  if (error && error.name === 'SyntaxError') return issue('invalid-content', '收到的网页内容不完整，请重新获取。');
+  return issue('connection', navigator.onLine === false ? '网络已断开，请连接网络后继续。' : '连接暂时中断，正在尝试重新获取内容。');
  }
- const packet=await read(META,'json');
- // srcdoc has about:srcdoc as location.href. Resolve model URLs in the parent first.
- window.QinglanHandAssets=packet.hand;
- for(const key of ['runtime','loader','wasm','model'])window.QinglanHandAssets[key].url=new URL(packet.hand[key].url,location.href).href;
- window.ORCHID_SHARED=packet.shared;window.ORCHID_SOURCES={};
- window.OrchidExperienceResources=Object.freeze({
-  source(mode){if(window.ORCHID_SOURCES[mode])return Promise.resolve(window.ORCHID_SOURCES[mode]);if(!packet.sources[mode])return Promise.reject(new Error('未找到这个体验板块'));if(!pending.has(mode)){const task=read(packet.sources[mode],'text').then(text=>{window.ORCHID_SOURCES[mode]=text;pending.delete(mode);return text;},error=>{pending.delete(mode);throw error;});pending.set(mode,task);}return pending.get(mode);},
-  status:()=>({sourceModes:Object.keys(window.ORCHID_SOURCES),modelDelivery:'on-camera-start'})
- });
- const shared=window.ORCHID_SHARED;
- shared.instituteImageUrl=shared.labAssets.instituteAtmosphere;
- document.documentElement.style.setProperty('--institute-image','url("'+shared.instituteImageUrl+'")');
- for(const [key,value] of Object.entries(shared.uiAssets))document.documentElement.style.setProperty(key==='landscape'?'--booth-landscape':'--booth-orchid','url("'+value+'")');
- shared.localImageCount=51;shared.bootMs=Math.round(performance.now());
- return true;
-})();
-window.OrchidBoot.catch(()=>{const retry=document.getElementById('retryMode');if(retry){retry.hidden=false;retry.textContent='重新加载';retry.addEventListener('click',()=>location.reload(),{once:true});}});</script><script id="portalController">window.OrchidBoot.then(()=>{(() => {
+ function display(url, label, received, total, started) {
+  var value = { label: label, received: received, total: total, elapsedMs: Date.now() - started };
+  progress.set(url, value);
+  var amount = Math.max(0, Math.round(received / 1024));
+  // HTTP Content-Length can describe compressed bytes while streams expose decoded bytes.
+  note(label + ' · 已收到 ' + amount + ' KB' + (value.elapsedMs > 12000 ? '，网络较慢，正在继续加载…' : '…'));
+  if (config.binaryAssets.some(function (item) { return url === item.url || url === new URL(item.url, location.href).href; })) {
+   var receivedBytes = 0, totalBytes = 0;
+   config.binaryAssets.forEach(function (item) { totalBytes += item.bytes; var transfer = progress.get(new URL(item.url, location.href).href) || progress.get(item.url); if (transfer) receivedBytes += Math.min(item.bytes, transfer.received); });
+   handListeners.forEach(function (listener) { try { listener({ received: receivedBytes, total: totalBytes, message: '正在准备手势组件 · ' + (receivedBytes / 1048576).toFixed(1) + ' / ' + (totalBytes / 1048576).toFixed(1) + ' MB，首次开启请稍候…' }); } catch (_) {} });
+  }
+ }
+ function pause(milliseconds) {
+  return new Promise(function (resolve) {
+   if (navigator.onLine !== false) { setTimeout(resolve, milliseconds); return; }
+   note('网络已断开，连接恢复后会继续加载…');
+   var done = false, timer;
+   function finish() { if (done) return; done = true; clearTimeout(timer); window.removeEventListener('online', finish); resolve(); }
+   window.addEventListener('online', finish); timer = setTimeout(finish, 20000);
+  });
+ }
+ function validateType(type, kind, status) {
+  if (status < 200 || status > 299) throw issue('http', status === 404 ? '这份体验内容暂时没有找到（404），请稍后重试。' : '服务器暂时无法提供内容（' + status + '），请稍后重试。', status);
+  if (kind === 'binary') return;
+  var valid = kind === 'json' ? /\bapplication\/(?:[a-z0-9.+-]+\+)?json\b/i.test(type) : /\btext\/html\b/i.test(type);
+  if (!valid) throw issue('invalid-content', '打开时收到的内容格式不正确，请重新获取；若连接公共 Wi-Fi，请先完成网络登录。');
+ }
+ function validateText(text, kind, url) {
+  if (kind === 'binary') return text;
+  if (kind === 'json') {
+   var value;
+   try { value = JSON.parse(text); } catch (_) { throw issue('invalid-content', '收到的体验内容不完整，请重新获取。'); }
+   if (url === config.metadataURL && (!value || !value.hand || !value.shared || !value.shared.labAssets || !value.shared.uiAssets || !value.shared.bloomAssets || typeof value.shared.bloomAssets.atlas !== 'string' || !value.sources || ['shop', 'lab', 'bloom'].some(function (mode) { return typeof value.sources[mode] !== 'string'; }) || ['runtime', 'loader', 'wasm', 'model'].some(function (key) { return !value.hand[key] || typeof value.hand[key].url !== 'string'; }))) throw issue('invalid-content', '收到的体验内容不完整，正在重新获取。');
+   if (url === config.bloomFlowURL && (!value || !value.flow || !value.flow.gridPoints || !Array.isArray(value.flow.pairs) || !value.flow.pairs.length || !Array.isArray(value.flows) || !value.flows.length || value.flows.some(function (flow) { return flow !== null && (!flow || !flow.gridPoints || !Array.isArray(flow.pairs)); }))) throw issue('invalid-content', '掌心开花的内容尚未完整读取，正在重新获取。');
+   return value;
+  }
+  if (text.indexOf('ExperienceBridge') < 0 || text.indexOf('OrchidHands') < 0) throw issue('invalid-content', '收到的体验页面不完整，请重新获取。');
+  return text;
+ }
+ function transfer(url, kind, label, attempt) {
+  return new Promise(function (resolve, reject) {
+   var start = Date.now(), lastData = start, received = 0, total = 0, settled = false, abort = function () {}, timer;
+   function cleanup() { clearInterval(timer); }
+   function fail(error) { if (settled) return; settled = true; cleanup(); abort(); record('failed', { url: url, code: error.resourceCode || error.name, attempt: attempt, received: received, elapsedMs: Date.now() - start }); reject(failure(error)); }
+   function finish(text) { if (settled) return; try { var value = validateText(text, kind, url); settled = true; cleanup(); record('complete', { url: url, attempt: attempt, received: received, elapsedMs: Date.now() - start }); resolve(value); } catch (error) { fail(error); } }
+   function update(count, expected) { if (settled) return; if (count > received) lastData = Date.now(); received = count; total = expected || total; display(url, label, received, total, start); }
+   display(url, label, 0, 0, start);
+   timer = setInterval(function () {
+    if (Date.now() - start > (kind === 'binary' ? 600000 : TOTAL_MS)) fail(issue('time-limit', kind === 'binary' ? '手势组件本次准备已超过 10 分钟，请换到更稳定的网络后重试。' : '本次加载已等待 3 分钟，请换到更稳定的网络后重试。'));
+    else if (Date.now() - lastData > STALL_MS) fail(issue('stalled', '已较长时间没有收到新内容，正在重新连接。'));
+   }, 1000);
+   // XHR preserves progress and cancellation on browsers lacking streams or AbortController.
+   var streamed = typeof fetch === 'function' && typeof AbortController === 'function' && typeof ReadableStream === 'function' && typeof TextDecoder === 'function';
+   if (!streamed && typeof XMLHttpRequest === 'function') {
+    var request = new XMLHttpRequest(); abort = function () { request.abort(); };
+    request.open('GET', url, true);
+    if (kind === 'binary') request.responseType = 'arraybuffer';
+    if (attempt > 1) request.setRequestHeader('Cache-Control', 'no-cache');
+    request.onprogress = function (event) { update(event.loaded, event.lengthComputable ? event.total : 0); };
+    request.onload = function () { try { validateType(request.getResponseHeader('Content-Type') || '', kind, request.status); var body = kind === 'binary' ? request.response : request.responseText; update(Math.max(received, kind === 'binary' ? body.byteLength : body.length), total); finish(body); } catch (error) { fail(error); } };
+    request.onerror = function () { fail(issue('connection', '连接暂时中断，正在尝试重新获取内容。')); };
+    request.onabort = function () { if (!settled) fail(issue('connection', '连接暂时中断，正在尝试重新获取内容。')); };
+    try { request.send(); } catch (error) { fail(error); }
+    return;
+   }
+   if (!streamed) { fail(issue('unsupported', '当前浏览器暂不支持完整体验，请用系统 Chrome 或 Safari 浏览器打开。')); return; }
+   var controller = new AbortController(); abort = function () { controller.abort(); };
+   fetch(url, { credentials: 'same-origin', cache: attempt > 1 ? 'reload' : 'force-cache', signal: controller.signal }).then(async function (response) {
+    validateType(response.headers.get('Content-Type') || '', kind, response.status);
+    total = Number(response.headers.get('Content-Length')) || 0; lastData = Date.now();
+    if (!response.body || typeof response.body.getReader !== 'function') {
+     var text = kind === 'binary' ? await response.arrayBuffer() : await response.text(); update(kind === 'binary' ? text.byteLength : text.length, total); finish(text); return;
+    }
+    var reader = response.body.getReader(), decoder = new TextDecoder('utf-8'), parts = [];
+    while (!settled) {
+     var chunk = await reader.read(); if (chunk.done) break;
+     update(received + chunk.value.byteLength, total); parts.push(kind === 'binary' ? chunk.value : decoder.decode(chunk.value, { stream: true }));
+    }
+    if (!settled) {
+     if (kind === 'binary') { var bytes = new Uint8Array(received), offset = 0; parts.forEach(function (part) { bytes.set(part, offset); offset += part.byteLength; }); finish(bytes.buffer); }
+     else { parts.push(decoder.decode()); finish(parts.join('')); }
+    }
+   }).catch(fail);
+  });
+ }
+ async function read(url, kind, label) {
+  var error;
+  for (var attempt = 1; attempt <= ATTEMPTS; attempt++) {
+   try {
+    var payload = await transfer(url, kind, label, attempt);
+    if (kind === 'binary') {
+     var expected = config.binaryAssets.find(function (asset) { return url === asset.url || url === new URL(asset.url, location.href).href; });
+     if (!expected || payload.byteLength !== expected.bytes) throw issue('invalid-content', '手势组件尚未完整收到，正在重新获取。');
+     if (window.crypto && window.crypto.subtle) { var digest = await window.crypto.subtle.digest('SHA-256', payload), actual = Array.from(new Uint8Array(digest)).map(function (byte) { return byte.toString(16).padStart(2, '0'); }).join(''); if (actual !== expected.sha256) throw issue('invalid-content', '手势组件内容校验未完成，正在重新获取。'); }
+    }
+    return payload;
+   }
+   catch (caught) {
+    error = failure(caught);
+    if (error.resourceCode === 'unsupported' || error.resourceCode === 'time-limit' || error.httpStatus === 404) break;
+    if (attempt < ATTEMPTS) { note(error.message + ' 自动重试 ' + (attempt + 1) + '/' + ATTEMPTS + '…'); record('retry', { url: url, attempt: attempt + 1, code: error.resourceCode }); await pause(attempt === 1 ? 1000 : 3000); }
+   }
+  }
+  throw error;
+ }
+ function showFailure(error) {
+  if (!error || !error.resourceCode) { record('runtime-error', { name: error && error.name, message: error && error.message }); error = issue('unsupported', '当前浏览器运行页面时遇到兼容问题，请用系统 Chrome 或 Safari 浏览器重新打开。'); }
+  var title = byId('loadingTitle'), retry = byId('retryMode');
+  if (title) title.textContent = error.resourceCode === 'unsupported' ? '请换一个浏览器打开' : '这次加载尚未完成';
+  note(error.message || '页面暂时无法继续，请重新打开。');
+  if (retry) { retry.hidden = false; retry.textContent = '重新加载'; retry.addEventListener('click', function () { location.reload(); }, { once: true }); }
+ }
+ window.OrchidExperienceLoading = Object.freeze({ showFailure: showFailure });
+ // These small compatibility helpers do not change scene or camera behavior.
+ if (!Object.entries) Object.entries = function (object) { return Object.keys(object).map(function (key) { return [key, object[key]]; }); };
+ if (!Object.fromEntries) Object.fromEntries = function (entries) { var object = {}; Array.from(entries).forEach(function (entry) { object[entry[0]] = entry[1]; }); return object; };
+ window.OrchidBoot = (async function () {
+  await (window.OrchidPerformance && window.OrchidPerformance.ready || Promise.resolve());
+  var packet = await read(config.metadataURL, 'json', '正在读取体验内容');
+  if (!packet || !packet.hand || !packet.shared || !packet.shared.labAssets || !packet.shared.uiAssets || !packet.sources || ['runtime', 'loader', 'wasm', 'model'].some(function (key) { return !packet.hand[key] || typeof packet.hand[key].url !== 'string'; })) throw issue('invalid-content', '收到的体验内容不完整，请重新获取。');
+  window.QinglanHandAssets = packet.hand;
+  ['runtime', 'loader', 'wasm', 'model'].forEach(function (key) { packet.hand[key].url = new URL(packet.hand[key].url, location.href).href; });
+  window.ORCHID_SHARED = packet.shared; window.ORCHID_SOURCES = parsedSources;
+  var flowTask, flowReady = false, handTask, handReady = false;
+  function flow() {
+   if (flowReady) return Promise.resolve();
+   if (!flowTask) flowTask = read(config.bloomFlowURL, 'json', '正在准备掌心开花').then(function (data) {
+    if (!data || !data.flow || !data.flows) throw issue('invalid-content', '掌心开花的内容尚未完整读取，请重试。');
+    Object.assign(packet.shared.bloomAssets, data); flowReady = true;
+   }).catch(function (error) { flowTask = null; throw error; });
+   return flowTask;
+  }
+  window.OrchidExperienceResources = Object.freeze({
+   prepareHandAssets: function (listener) {
+    if (typeof listener === 'function') handListeners.add(listener);
+    if (!handTask) handTask = Promise.all(config.binaryAssets.map(function (asset) { return read(new URL(asset.url, location.href).href, 'binary', '正在准备手势组件'); })).then(function (buffers) {
+     config.binaryAssets.forEach(function (asset, index) { packet.hand[asset.key] = { buffer: buffers[index] }; }); handReady = true; record('hand-assets-ready', { verifiedBytes: config.binaryAssets.reduce(function (sum, asset) { return sum + asset.bytes; }, 0) });
+    }).catch(function (error) { handTask = null; throw error; });
+    return handTask.finally(function () { if (typeof listener === 'function') handListeners.delete(listener); });
+   },
+   source: function (mode) {
+    if (parsedSources[mode]) return Promise.resolve(parsedSources[mode]);
+    if (!packet.sources[mode]) return Promise.reject(issue('invalid-content', '暂时没有找到这个体验板块。'));
+    if (!pending.has(mode)) {
+     var task = Promise.all([read(packet.sources[mode], 'html', '正在打开' + ({ shop: '清兰花棚', lab: '互动研究所', bloom: '掌心开花' })[mode]), mode === 'bloom' ? flow() : Promise.resolve()]).then(function (results) { parsedSources[mode] = results[0]; pending.delete(mode); return results[0]; }, function (error) { pending.delete(mode); throw error; });
+     pending.set(mode, task);
+    }
+    return pending.get(mode);
+   },
+   status: function () { return { sourceModes: Object.keys(parsedSources), modelDelivery: 'on-camera-start', handReady: handReady, flowReady: flowReady, phase: phase, transfers: Array.from(progress.values()), diagnostics: diagnostics.slice() }; }
+  });
+  var shared = packet.shared;
+  shared.instituteImageUrl = shared.labAssets.instituteAtmosphere;
+  document.documentElement.style.setProperty('--institute-image', 'url("' + shared.instituteImageUrl + '")');
+  Object.entries(shared.uiAssets).forEach(function (entry) { document.documentElement.style.setProperty(entry[0] === 'landscape' ? '--booth-landscape' : '--booth-orchid', 'url("' + entry[1] + '")'); });
+  shared.localImageCount = config.localImageCount; shared.bootMs = Math.round(performance.now()); phase = 'scenes';
+  return true;
+ })();
+ window.OrchidBoot.catch(showFailure);
+})({"metadataURL":"/qinglan-orchid/assets/experience/scene-index-641fa848f2000081.json","bloomFlowURL":"/qinglan-orchid/assets/experience/bloom-flow-d8dec7e9f99d2e8a.json","localImageCount":51,"binaryAssets":[{"key":"runtime","url":"/qinglan-orchid/assets/experience/40f4123dfcd75cfa58add046.js","bytes":137735,"sha256":"40f4123dfcd75cfa58add046919cc6f52fde66f009ff582997c09ba54c6ba27c"},{"key":"loader","url":"/qinglan-orchid/assets/experience/927def7b465c51b86e4b3060.js","bytes":204137,"sha256":"927def7b465c51b86e4b3060f93646aca4e27121f4b8fc0483786e407ea9cf1f"},{"key":"wasm","url":"/qinglan-orchid/assets/experience/3821ea9b1f7fb8c549ef2a06.wasm","bytes":9448638,"sha256":"3821ea9b1f7fb8c549ef2a064ef5c85750bf375c545a49fd6eea0df44a95f1f4"},{"key":"model","url":"/qinglan-orchid/assets/experience/fbc2a30080c3c557093b5ddf.bin","bytes":7819105,"sha256":"fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1"}]});
+</script><script id="portalController">window.OrchidBoot.then(()=>{(() => {
  'use strict';
  const names={shop:'清兰花棚',lab:'互动研究所',bloom:'掌心开花'},$=id=>document.getElementById(id),frames=new Map();
  let active='lab',request=0,transition=false,soundWanted=false,cameraWanted=false,toastTimer;
@@ -324,7 +625,39 @@ window.OrchidBoot.catch(()=>{const retry=document.getElementById('retryMode');if
  function loaded(mode=active){return frames.get(mode)?.ready?frames.get(mode).frame.contentWindow:null}
  function currentStatus(){const w=loaded();return {mode:active,loaded:!!w,camera:camOf(w)?.status?.()||null,sound:soundOf(w)?.status?.()||null,transition,cameraWanted}}
  function reflect(){const s=currentStatus(),on=!!s.sound?.enabled,cam=!!s.camera?.camera,busy=transition||!s.loaded;for(const id of ['shellSound','shellCamera'])$(id).disabled=busy;$('shellCamera').disabled=busy||!cameraPreloaded;$('shellSound').classList.toggle('on',on&&!s.sound?.muted);$('shellSound').setAttribute('aria-pressed',String(on));$('shellSound').textContent=on?(s.sound?.muted?'继续音乐':'音乐 · 开'):'音乐 · 关';$('shellCamera').classList.toggle('on',cam);$('shellCamera').setAttribute('aria-pressed',String(cam));$('shellCamera').textContent=['loading','requesting'].includes(s.camera?.state)?'手势准备中':cam?'手势 · 开':'手势 · 关'}
- async function load(mode){let item=frames.get(mode);if(item)return item.promise;const frame=document.createElement('iframe');frame.id='frame'+mode[0].toUpperCase()+mode.slice(1);frame.className='portal-frame';frame.title=names[mode];frame.allow='camera *; autoplay *; fullscreen *';frame.setAttribute('allowfullscreen','');frame.hidden=true;item={frame,ready:false};frames.set(mode,item);item.promise=new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('场景加载较慢，请重新打开')),45000);frame.onload=()=>{if(!frame.contentWindow?.ExperienceBridge)return;clearTimeout(timer);item.ready=true;if(!cameraPreloaded)frame.contentDocument.querySelectorAll('#labStartCamera,#startMobileCamera,#startBloomCamera').forEach(b=>b.disabled=true);resolve(frame.contentWindow)};frame.onerror=()=>{clearTimeout(timer);reject(new Error('场景未能打开'))};});window.OrchidExperienceResources.source(mode).then(source=>{$('portalStage').append(frame);frame.srcdoc=source;},error=>{frame.dispatchEvent(new Event('error'));});item.promise.catch(()=>{frame.remove();if(frames.get(mode)===item)frames.delete(mode);});return item.promise}
+ async function load(mode){
+  let item=frames.get(mode);if(item)return item.promise;
+  const frame=document.createElement('iframe');frame.id='frame'+mode[0].toUpperCase()+mode.slice(1);frame.className='portal-frame';frame.title=names[mode];frame.allow='camera *; autoplay *; fullscreen *';frame.setAttribute('allowfullscreen','');frame.hidden=true;
+  item={frame,ready:false};frames.set(mode,item);
+  item.promise=new Promise((resolve,reject)=>{
+   let settled=false,timer=null,poll=null,assignedAt=0;
+   function finish(error){
+    if(settled)return;settled=true;clearTimeout(timer);clearInterval(poll);
+    if(error){reject(error);return;}
+    item.ready=true;if(!cameraPreloaded)frame.contentDocument.querySelectorAll('#labStartCamera,#startMobileCamera,#startBloomCamera').forEach(button=>button.disabled=true);resolve(frame.contentWindow);
+   }
+   function check(){
+    if(settled||!assignedAt)return;
+    const window=frame.contentWindow,document=frame.contentDocument;
+    if(!document||document.readyState==='loading')return;
+    if(window?.ExperienceBridge){finish();return;}
+    if(Date.now()-assignedAt>1500){const error=new Error('这个浏览器暂未能运行体验板块，请用系统 Chrome 或 Safari 打开。');error.resourceCode='unsupported';finish(error);}
+   }
+   frame.onload=check;
+   frame.onerror=()=>{const error=new Error('这个体验板块暂时未能打开，请重试。');error.resourceCode='scene';finish(error);};
+   window.OrchidExperienceResources.source(mode).then(source=>{
+    if(settled)return;
+    $('portalStage').append(frame);frame.srcdoc=source;assignedAt=Date.now();
+    // The network request has its own progress/stall limits. This timer starts only
+    // after the complete HTML is present, and never counts time receiving bytes.
+    timer=setTimeout(()=>{const error=new Error('体验板块暂未完成初始化，请重试或换用系统浏览器。');error.resourceCode='scene';finish(error);},45000);
+    poll=setInterval(check,150);
+   },finish);
+  });
+  item.promise.catch(()=>{frame.remove();if(frames.get(mode)===item)frames.delete(mode);});
+  return item.promise;
+ }
+
  async function pause(mode){const w=loaded(mode);if(!w)return;try{await w.ExperienceBridge.pause()}catch(e){console.warn('Scene pause',mode,e)}const frame=frames.get(mode).frame;frame.hidden=true}
  async function go(mode,{initial=false}={}){
   if(!names[mode]||mode===active&&loaded(mode)&&!initial&&!transition)return;
@@ -351,7 +684,7 @@ window.OrchidBoot.catch(()=>{const retry=document.getElementById('retryMode');if
     await w.ExperienceBridge.resume({sound:soundWanted});
     if(token!==request)return;
     if(cameraWanted){
-     try{const result=await camOf(w)?.start?.();if(token===request&&result?.ok===false&&!result.cancelled)say(result.message||'摄像头正在恢复，可继续触屏操作。');}
+     try{const starting=camOf(w)?.start?.();const settled=result=>{if(token===request&&result?.ok===false&&!result.cancelled)say(result.message||'摄像头正在恢复，可继续触屏操作。');if(token===request)reflect();};if(window.OrchidExperienceResources?.status?.().handReady===false)Promise.resolve(starting).then(settled,error=>{if(token===request)say('手势组件暂未准备好，可继续触屏体验并稍后重试。');});else settled(await starting);}
      catch(error){if(token===request)say('摄像头暂未恢复，可继续点击或触屏操作。');}
     }
     if(token!==request)return;
@@ -364,15 +697,15 @@ window.OrchidBoot.catch(()=>{const retry=document.getElementById('retryMode');if
   return sceneQueue;
  }
  document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{shared.noteActivation();go(b.dataset.mode)}));
- $('retryMode').addEventListener('click',()=>{const item=frames.get(retryTarget);item?.frame.remove();frames.delete(retryTarget);go(retryTarget,{initial:true})});
+ $('retryMode').addEventListener('click',()=>{const item=frames.get(retryTarget);item?.frame.remove();frames.delete(retryTarget);go(retryTarget,{initial:true}).then(preloadAfterReady).catch(backgroundLoadError)});
  $('shellSound').addEventListener('click',async()=>{shared.noteActivation();const w=loaded();if(!w)return;try{const s=soundOf(w).status();soundWanted=!s.enabled||s.muted;await w.ExperienceBridge.setSound(soundWanted);reflect();if(soundWanted&&soundOf(w).status().muted)say('请在当前场景再轻触一次声音按钮继续播放。')}catch(e){say('声音尚未准备好，请再点一次。')}});
  $('shellCamera').addEventListener('click',async()=>{shared.noteActivation();const w=loaded(),cam=camOf(w);if(!cam)return;try{const s=cam.status();if(s.camera||['loading','requesting'].includes(s.state)){cameraWanted=false;cam.stop('stopped')}else{cameraWanted=true;await cam.start()}}catch(e){cameraWanted=false;say('相机未能开启；可继续点击或触屏体验。')}reflect()});
  window.addEventListener('message',event=>{const entry=[...frames.entries()].find(([,v])=>v.frame.contentWindow===event.source);if(!entry||!event.data||event.data.type!=='orchid-scene-status')return;const [mode]=entry;if(mode!==active||transition)return;const d=event.data;if(d.kind==='sound')soundWanted=!!d.sound?.enabled;if(d.kind==='camera'){if(d.camera?.state==='running')cameraWanted=true;else if(d.camera?.state==='stopped'&&!['mode-switch','scene-pause','camera-device-change'].includes(d.camera?.code))cameraWanted=false}reflect()});
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cameraWanted=false;const w=loaded();w?.ExperienceBridge.pause()}else loaded()?.ExperienceBridge.resume({sound:soundWanted});reflect()});window.addEventListener('pagehide',()=>{cameraWanted=false;for(const mode of frames.keys())void pause(mode)});
  async function preload(){const result=await Promise.all(['shop','lab','bloom'].map(async mode=>{const w=await load(mode);if(mode!==active)await w.ExperienceBridge.pause();return mode}));cameraPreloaded=true;for(const item of frames.values())item.frame.contentDocument.querySelectorAll('#labStartCamera,#startMobileCamera,#startBloomCamera').forEach(b=>b.disabled=false);reflect();return result}
 
- function selectCameraDevice(deviceId){
-  shared.noteActivation();const w=loaded(),cam=camOf(w),state=cam?.status?.()||{},restart=!!state.camera||['loading','requesting'].includes(state.state);
+ function selectCameraDevice(deviceId,restoreCamera=false){
+  shared.noteActivation();const w=loaded(),cam=camOf(w),state=cam?.status?.()||{},restart=!!state.camera||['loading','requesting'].includes(state.state)||(restoreCamera&&window.QinglanMacCameraConfig?.enabled===true&&window.PortalCamera?.status?.().permissionKnown);
   if(window.PortalCamera?.status?.().pending)throw new Error('相机正在连接，请待画面出现后再切换。');
   if(restart){cameraWanted=false;cam.stop('camera-device-change');}
   window.PortalCamera.selectDevice(deviceId);
@@ -383,9 +716,9 @@ window.OrchidBoot.catch(()=>{const retry=document.getElementById('retryMode');if
  }
 
  window.QinglanPortal={preload,version:'20261019-v65',go,selectCameraDevice,status:currentStatus,frames:()=>Object.fromEntries([...frames].map(([k,v])=>[k,{ready:v.ready,hidden:v.frame.hidden,camera:camOf(v.frame.contentWindow)?.status?.()||null,sound:soundOf(v.frame.contentWindow)?.status?.()||null}]))};
- void go('lab',{initial:true}).then(()=>preload());
+ function backgroundLoadError(error){cameraPreloaded=true;for(const item of frames.values())if(item.ready)item.frame.contentDocument.querySelectorAll('#labStartCamera,#startMobileCamera,#startBloomCamera').forEach(button=>button.disabled=false);reflect();say('部分板块仍在准备，可继续当前体验，稍后再点相应板块重试。');console.warn('Scene background preparation',error);}function preloadAfterReady(){if(loaded())return preload();}void go('lab',{initial:true}).then(preloadAfterReady).catch(backgroundLoadError);
 })();
-}).catch(error=>{document.getElementById('loadingTitle').textContent='页面未能完整打开';document.getElementById('loadingText').textContent=error.message;console.error(error)});</script><script id="portal-gestures">/* One pointer in the parent viewport. Raw hand landmarks remain inside each child. */
+}).catch(error=>{if(window.OrchidExperienceLoading)window.OrchidExperienceLoading.showFailure(error);else{document.getElementById('loadingTitle').textContent='页面暂未能打开';document.getElementById('loadingText').textContent='请重新加载，或用系统Chrome/Safari浏览器打开。';}console.error(error)});</script><script id="portal-gestures">/* One pointer in the parent viewport. Raw hand landmarks remain inside each child. */
 (() => {
  'use strict';
  const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
