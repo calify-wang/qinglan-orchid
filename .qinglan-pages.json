@@ -5,11 +5,11 @@
   "ownerId": 347396746,
   "repository": "qinglan-orchid",
   "releaseTag": "v1.1.0",
-  "sourceVersion": "65e2a093b775e39920eb59a0",
+  "sourceVersion": "a8f98f26c3bb2ebdd7972973",
   "performance": {
     "schema": 1,
-    "version": "65e2a093b775e39920eb59a0",
-    "manifestSHA256": "d7c6b7dbbe0671f9b9533f0bfece440200046efdc46314161d13384f2b84b608",
+    "version": "a8f98f26c3bb2ebdd7972973",
+    "manifestSHA256": "6eeecaa722b94ae6597b0342ffe26073b08db203160707ac0539580b07f282fd",
     "assetPaths": [
       "assets/experience/1028f21574d077be73a06c83.jpg",
       "assets/experience/1155735c3230bf2216d848f1.webp",

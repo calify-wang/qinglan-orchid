@@ -641,7 +641,9 @@ html.orchid-gloves-right #portalHandPointer{opacity:0!important}
     const window=frame.contentWindow,document=frame.contentDocument;
     if(!document||document.readyState==='loading')return;
     if(window?.ExperienceBridge){finish();return;}
-    if(Date.now()-assignedAt>1500){const error=new Error('这个浏览器暂未能运行体验板块，请用系统 Chrome 或 Safari 打开。');error.resourceCode='unsupported';finish(error);}
+    // The initial about:blank can still be "complete" while srcdoc navigation is
+    // queued. Readiness is the real scene bridge; the bounded timer below owns
+    // initialization failure, including slower document parsing on mobile.
    }
    frame.onload=check;
    frame.onerror=()=>{const error=new Error('这个体验板块暂时未能打开，请重试。');error.resourceCode='scene';finish(error);};
