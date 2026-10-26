@@ -1,37 +1,37 @@
 {
-  "version": "v1.1.0",
+  "version": "v1.1.6",
   "downloads": [
     {
       "asset": "Qinglan-Windows.zip",
-      "bytes": 165136543,
-      "sha256": "44126b4266de935b4d8b016bcabfe19b4fbfd4ddbb24d357977acca6d2988d59",
-      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.4/Qinglan-Windows.zip"
+      "bytes": 165137350,
+      "sha256": "338b9597d615cbc12fc06a389f87ab585ad89c80bd518073b1f3c12391f10de8",
+      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.6/Qinglan-Windows.zip"
     },
     {
       "asset": "Qinglan-macOS-Intel.zip",
-      "bytes": 147111104,
-      "sha256": "d41d74733700e76cc37bc96215bca69feeeef2490a077da11c3ba1020369d617",
-      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.4/Qinglan-macOS-Intel.zip"
+      "bytes": 147111919,
+      "sha256": "621d301fcc203811b7a8cfd6d518326ab4487b6f1185441908586deaf9d79ea5",
+      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.6/Qinglan-macOS-Intel.zip"
     },
     {
       "asset": "Qinglan-macOS-AppleSilicon.zip",
-      "bytes": 142232398,
-      "sha256": "fb0a9939b24418cfe31b17d873709e1d962068e40a08786edd006eb6c315fcae",
-      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.4/Qinglan-macOS-AppleSilicon.zip"
+      "bytes": 142233213,
+      "sha256": "03880c5bdd3c02e4d6fdd0c285011cf6dc60362a0c338003f29bc18e28126a8d",
+      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.6/Qinglan-macOS-AppleSilicon.zip"
     },
     {
       "asset": "qinglan-offline.html",
-      "bytes": 39932062,
-      "sha256": "8fc0ec7b35f40f6466908bdb1d5e0f47899ca9b9b105c2918f4c72ecb579ef95",
-      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.0/qinglan-offline.html"
+      "bytes": 39940982,
+      "sha256": "68229719b226b20f7944b0b7958efdc9ea7750cf743fcede4be0db49a239f621",
+      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.6/qinglan-offline.html"
     },
     {
       "asset": "Qinglan-Android.apk",
       "bytes": 32875473,
-      "sha256": "05564f1b77c764eb130b85e40270f6fa76d1c2bc0dc525e9a69d816753c9c2d8",
-      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.4/Qinglan-Android.apk",
-      "mirrorURL": "/qinglan-orchid/assets/downloads/Qinglan-Android-1.1.4.apk"
+      "sha256": "ffd549f9c531000c74259c22311c29219fcadc2e82d4133a2a924f15678fae58",
+      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.6/Qinglan-Android.apk",
+      "mirrorURL": "/qinglan-orchid/assets/downloads/Qinglan-Android-1.1.6.apk"
     }
   ],
-  "siteVersion": "1.1.5"
+  "siteVersion": "1.1.6"
 }

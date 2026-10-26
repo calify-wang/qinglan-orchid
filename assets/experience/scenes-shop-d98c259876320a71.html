@@ -3563,6 +3563,23 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     Promise.resolve().then(()=>{if(!live(s))throw cancelError();return work();}).then(value=>finish(resolve,value),error=>finish(reject,error));
     if(!live(s))cancel();
   });}
+  async function createLegacyModel(s){
+    await waitForStartupTask(s,()=>parent.QinglanLegacyHands.prepare(progress=>{if(live(s))publish({state:'loading',capturePhase:'model-downloading',camera:true,hand:false,message:progress.message});}));
+    const prepared=await waitForStartupTask(s,()=>parent.QinglanLegacyHands.create(),45000);
+    if(!live(s)){prepared.close();throw cancelError();}
+    s.model=prepared;s.canvas=document.createElement('canvas');s.context=s.canvas.getContext('2d',{alpha:false});
+    if(!s.context)throw new Error('浏览器无法建立画面缓冲区');
+    s.backend='wasm-compat';s.workerDelegate='CPU';state.delegate='CPU';s.interval=1000/8;
+  }
+  async function captureLegacyFrame(s,dims){
+    try{
+      if(s.canvas.width!==dims.width||s.canvas.height!==dims.height){s.canvas.width=dims.width;s.canvas.height=dims.height;}
+      const at=performance.now();s.context.drawImage(video,0,0,dims.width,dims.height);s.captureMs=performance.now()-at;
+      const began=performance.now(),result=await s.model.detectForVideo(s.canvas,performance.now());
+      if(live(s))acceptResult(s,result,dims.width,dims.height,performance.now()-began);
+    }catch(error){if(live(s)&&error?.code!=='cancelled')fail(s,error);}
+    finally{s.busy=false;if(live(s))state.inFlight=0;}
+  }
   async function createMainModel(s){
     const a=normalizedAssets();
     let runtime;
@@ -3767,6 +3784,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     const dims=dimensions(video.videoWidth,video.videoHeight);
     s.lastVideoTime=video.currentTime;s.lastVideoSerial=s.videoSerial;s.lastFrame=now;s.captureStarted=performance.now();s.busy=true;state.inFlight=1;
     if(workerBackend(s)){void captureWorkerFrame(s,performance.now(),dims);return;}
+    if(s.legacy){void captureLegacyFrame(s,dims);return;}
     try{
       if(s.canvas.width!==dims.width||s.canvas.height!==dims.height){s.canvas.width=dims.width;s.canvas.height=dims.height;}
       const captureAt=performance.now();s.context.drawImage(video,0,0,dims.width,dims.height);s.captureMs=performance.now()-captureAt;
@@ -3839,8 +3857,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       if(!live(s))return {ok:false,cancelled:true,...status()};
       watchVideoFrames(s,video);
       publish({state:'loading',capturePhase:'model-loading',camera:true,hand:false,message:'摄像头画面已就绪，正在加载本地手势识别…'});
-      if(parent.OrchidExperienceResources?.prepareHandAssets){await new Promise((resolve,reject)=>{let settled=false;const finish=(fn,value)=>{if(settled)return;settled=true;s.startupCancels.delete(cancel);fn(value);};const cancel=()=>finish(reject,cancelError());s.startupCancels.add(cancel);parent.OrchidExperienceResources.prepareHandAssets(progress=>{if(live(s))publish({state:'loading',capturePhase:'model-downloading',camera:true,hand:false,message:progress.message});}).then(()=>finish(resolve),error=>finish(reject,error));if(!live(s))cancel();});if(!live(s))return {ok:false,cancelled:true,...status()};publish({state:'loading',capturePhase:'model-loading',camera:true,hand:false,message:'手势组件已准备好，正在本机启动识别…'});}
-      if(s.safari){state.fallbackReason='Safari DOM-canvas compatibility';await createMainModel(s);}
+      if(!s.legacy&&parent.OrchidExperienceResources?.prepareHandAssets){await new Promise((resolve,reject)=>{let settled=false;const finish=(fn,value)=>{if(settled)return;settled=true;s.startupCancels.delete(cancel);fn(value);};const cancel=()=>finish(reject,cancelError());s.startupCancels.add(cancel);parent.OrchidExperienceResources.prepareHandAssets(progress=>{if(live(s))publish({state:'loading',capturePhase:'model-downloading',camera:true,hand:false,message:progress.message});}).then(()=>finish(resolve),error=>finish(reject,error));if(!live(s))cancel();});if(!live(s))return {ok:false,cancelled:true,...status()};publish({state:'loading',capturePhase:'model-loading',camera:true,hand:false,message:'手势组件已准备好，正在本机启动识别…'});}
+      if(s.legacy){state.fallbackReason='WebGL2 unavailable; baseline WASM compatibility';await createLegacyModel(s);}
+      else if(s.safari){state.fallbackReason='Safari DOM-canvas compatibility';await createMainModel(s);}
       else if(support().workerCapable){
         try{await createWorker(s);}catch(e){if(!live(s))throw e;await recoverBackend(s,e);}
       }else{state.fallbackReason='Worker / OffscreenCanvas / ImageBitmap unsupported';await createMainModel(s);}
@@ -3856,11 +3875,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     if(!s.secure)error={code:'insecure-context',message:'当前打开方式不是浏览器认可的安全环境，不能申请摄像头。请继续触摸操作；手势需要支持摄像头的本地文件环境或有效 HTTPS 页面。'+hint()};
     else if(!s.mediaAPI)error={code:'api-unavailable',message:'当前浏览器或文件预览器没有提供摄像头接口，无法启用手势。请继续触摸操作。'+hint()};
     else if(!s.wasm)error={code:'wasm-unavailable',message:'当前浏览器不支持离线手势识别需要的 WebAssembly，请继续触摸操作。'};
-    else if(safariFamily()&&!supportsWebGL2())error={code:'webgl2-unavailable',message:'这个Safari版本没有提供手势识别需要的WebGL2。Mac请用Chrome打开，或更新Safari/系统；iPad和iPhone请更新系统后使用Safari。选花、包装和浇花仍可点击或触摸操作。'};
     else if(!s.assetsReady)error={code:'assets-missing',message:'此文件缺少内嵌手势识别资源，请使用完整版。'};
     else if(navigator.userActivation&&!navigator.userActivation.isActive&&!parent.PortalGestures?.gestureAuthorized(window)&&!parent.PortalCamera?.status?.().masterLive&&!parent.PortalCamera?.status?.().pending)error={code:'user-action-required',message:'请点击“开启摄像头手势”按钮后启用；本页面不会自动打开摄像头。'};
     if(error)return Promise.resolve({ok:false,...publish({state:'unsupported',camera:false,hand:false,...error})});
-    const run={token:++generation,active:true,safari:safariFamily(),videoFrameSource:'currentTime',videoSerial:0,lastVideoSerial:-1,videoCallback:0,startupCancels:new Set(),stream:null,worker:null,model:null,canvas:null,bitmap:null,raf:0,urls:[],backend:'none',busy:false,fallingBack:false,lastFrame:-Infinity,lastVideoTime:-1,frameId:0,interval:1000/WORKER_FPS,cost:0,turnaround:0,captureStarted:0,captureMs:0,lastResultAt:0,lastSkippedVideoTime:-1,samples:0,sampleStart:0};current=run;
+    const run={token:++generation,active:true,safari:safariFamily(),legacy:!!parent.QinglanLegacyHands?.needsFallback(),videoFrameSource:'currentTime',videoSerial:0,lastVideoSerial:-1,videoCallback:0,startupCancels:new Set(),stream:null,worker:null,model:null,canvas:null,bitmap:null,raf:0,urls:[],backend:'none',busy:false,fallingBack:false,lastFrame:-Infinity,lastVideoTime:-1,frameId:0,interval:1000/WORKER_FPS,cost:0,turnaround:0,captureStarted:0,captureMs:0,lastResultAt:0,lastSkippedVideoTime:-1,samples:0,sampleStart:0};current=run;
     publish({state:'requesting',code:null,captureAttempt:1,captureProfile:'lightweight',capturePhase:'requesting',failurePhase:null,errorName:null,errorDetail:null,lastCaptureError:null,lastCaptureErrorName:null,camera:false,hand:false,backend:'none',frames:0,fps:0,inferenceMs:0,captureMs:0,roundTripMs:0,outputIntervalMs:0,smoothingMs:0,targetFPS:0,skippedFrames:0,inFlight:0,maxInFlight:0,fallbackReason:null,delegate:null,renderer:null,backendReason:null,message:'请在浏览器提示中允许摄像头，仅在本机识别手势，不录制、不上传。'+(wechat()?' 微信是否提供权限由当前容器决定。':'')});
     const portrait=innerHeight>innerWidth;
     const requested=requestCapture(run,{audio:false,video:{facingMode:{ideal:'user'},width:{ideal:portrait?240:320},height:{ideal:portrait?320:240},frameRate:{ideal:20}}});
@@ -3988,13 +4006,15 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   }
   function installBar(host) {
     if (bar || !host) return;
+    // Bloom already has a full-width status message beside its touch controls.
+    // Reuse it instead of repeating the same download progress twice.
+    if (mode === 'bloom') { message = document.getElementById('cameraMessage'); return; }
     bar = document.createElement('div'); bar.id = 'qinglanCameraProgress';
     bar.hidden = true; bar.setAttribute('role', 'status'); bar.setAttribute('aria-live', 'polite');
     label = document.createElement('strong'); label.id = 'qinglanCameraProgressLabel';
     message = document.createElement('span'); message.id = 'qinglanCameraProgressMessage';
     bar.appendChild(label); bar.appendChild(message);
-    if (mode === 'bloom') host.insertAdjacentElement('afterend', bar);
-    else host.appendChild(bar);
+    host.appendChild(bar);
   }
   function observe(video) {
     if (!video || video === observedVideo) return;
@@ -4025,6 +4045,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     var button = document.getElementById(ids.button);
     if (busy && button) text(button, previewReady ? '手势加载中…' : '正在连接摄像头…');
     if (mode === 'bloom') {
+      if (busy) text(message, (previewReady ? '摄像头已连接 · ' : '') + (last.message || '正在连接手势…'));
       var placeholder = document.getElementById('cameraEmpty');
       if (placeholder) placeholder.hidden = running || previewReady;
       text(document.getElementById('cameraBadge'), running || previewReady ? 'CAMERA / LIVE' : busy ? 'CAMERA / PREPARING' : 'CAMERA / OFF');
@@ -4041,7 +4062,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   window.OrchidCameraPreview = Object.freeze({
     status: function () {
       return { mode: mode, phase: last.capturePhase || null, previewReady: ready(document.getElementById(ids.video), last),
-        preparing: !bar || bar.hidden ? false : true, message: message && message.textContent || '' };
+        preparing: last.state === 'requesting' || last.state === 'loading', message: message && message.textContent || '' };
     }
   });
   var camera = engine(); draw(camera && camera.status ? camera.status() : {});
