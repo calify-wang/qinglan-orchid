@@ -5,11 +5,11 @@
   "ownerId": 347396746,
   "repository": "qinglan-orchid",
   "releaseTag": "v1.1.0",
-  "sourceVersion": "3019a84a9b65986a0844b34a",
+  "sourceVersion": "fe8a2471fc39d138a3dc1ffe",
   "performance": {
     "schema": 1,
-    "version": "3019a84a9b65986a0844b34a",
-    "manifestSHA256": "6296a7975414dc57fda7b184491b6c18f0f671b80c0e19f4cac161951f96066e",
+    "version": "fe8a2471fc39d138a3dc1ffe",
+    "manifestSHA256": "c2ceaf61f58896b5cad006eccbc9d7f2067f100dd98d36050bbdfdaf479b51c6",
     "assetPaths": [
       "assets/downloads/Qinglan-Android-1.1.4.apk",
       "assets/experience/1028f21574d077be73a06c83.jpg",
