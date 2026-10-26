@@ -1989,7 +1989,7 @@ window.QinglanSound=Object.freeze({version:'1.0.0',enable,disable,toggle:()=>ena
     '#cameraPod[data-camera-preparing="true"]{width:min(300px,calc(100vw - 24px))}' +
     '#cameraPod>#qinglanCameraProgress{margin:5px 8px 0;padding:9px 10px;border-radius:9px;font-size:12px}' +
     '#cameraPod>#qinglanCameraProgress strong{font-size:13px}' +
-    '#cameraPod[data-camera-preparing="true"]>#labCameraMessage{font-weight:650;font-size:12px;line-height:1.5}' +
+    '#cameraPod[data-camera-preparing="true"]>#labCameraMessage{display:none}' +
     '#cameraPreviewDock[data-camera-preparing="true"]{flex-wrap:wrap;max-width:min(340px,calc(100vw - 24px))}' +
     '#cameraPreviewDock>#qinglanCameraProgress{flex:0 0 100%;order:10;padding:8px 10px;font-size:12px;border-radius:8px}' +
     '#cameraPreviewDock>#qinglanCameraProgress strong{font-size:13px}' +
@@ -2034,23 +2034,23 @@ window.QinglanSound=Object.freeze({version:'1.0.0',enable,disable,toggle:()=>ena
     if (bar) {
       bar.hidden = !busy;
       if (busy) {
-        text(label, previewReady ? '摄像头已连接 · 手势准备中' : '正在连接摄像头');
+        text(label, previewReady ? '摄像头已连接' : '正在连接摄像头');
         text(message, last.message || (previewReady ? '画面已经就绪，正在启动手势识别…' : '请在浏览器提示中允许摄像头。'));
       }
     }
     var button = document.getElementById(ids.button);
-    if (busy && button) text(button, previewReady ? '正在准备手势…' : '正在连接摄像头…');
+    if (busy && button) text(button, previewReady ? '手势加载中…' : '正在连接摄像头…');
     if (mode === 'bloom') {
       var placeholder = document.getElementById('cameraEmpty');
       if (placeholder) placeholder.hidden = running || previewReady;
       text(document.getElementById('cameraBadge'), running || previewReady ? 'CAMERA / LIVE' : busy ? 'CAMERA / PREPARING' : 'CAMERA / OFF');
-      if (busy && previewReady) text(document.getElementById('handsBadge'), '手势准备中');
-      else if (running && document.getElementById('handsBadge') && document.getElementById('handsBadge').textContent === '手势准备中') text(document.getElementById('handsBadge'), '等待你的手');
+      if (busy && previewReady) text(document.getElementById('handsBadge'), '手势加载中');
+      else if (running && document.getElementById('handsBadge') && document.getElementById('handsBadge').textContent === '手势加载中') text(document.getElementById('handsBadge'), '等待你的手');
     } else if (mode === 'lab') {
-      if (busy && previewReady) text(document.getElementById('cameraHandCount'), '画面已连接 · 手势准备中');
-      else if (running && document.getElementById('cameraHandCount') && document.getElementById('cameraHandCount').textContent === '画面已连接 · 手势准备中') text(document.getElementById('cameraHandCount'), '等待手部');
+      if (busy && previewReady) text(document.getElementById('cameraHandCount'), '摄像头已连接');
+      else if (running && document.getElementById('cameraHandCount') && document.getElementById('cameraHandCount').textContent === '摄像头已连接') text(document.getElementById('cameraHandCount'), '等待手部');
     } else if (busy) {
-      text(document.getElementById('cameraPreviewStatus'), previewReady ? '画面已连接 · 手势准备中' : '正在连接摄像头');
+      text(document.getElementById('cameraPreviewStatus'), previewReady ? '摄像头已连接' : '正在连接摄像头');
     }
   }
   window.addEventListener(mode === 'shop' ? 'qinglan-camera-state' : 'orchid-camera-state', function (event) { draw(event.detail); });

@@ -6,7 +6,7 @@
   const isExperience = [BASE + 'experience', BASE + 'experience/', BASE + 'experience/index.html'].includes(location.pathname);
   const installed = () => !!navigator.standalone || !!(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
   function setStatus(text) { document.querySelectorAll('[data-qinglan-offline-status]').forEach(el => { el.textContent = text; }); }
-  function setBusy(value) { preparing = value; document.querySelectorAll('[data-qinglan-offline="prepare"]').forEach(el => { el.disabled = value; el.textContent = value ? '正在保存，请保持联网…' : '准备离线资源 · 约 46MB'; }); }
+  function setBusy(value) { preparing = value; document.querySelectorAll('[data-qinglan-offline="prepare"]').forEach(el => { el.disabled = value; el.textContent = value ? '正在保存，请保持联网…' : '保存离线资源（可选）'; }); }
   const ready = navigator.serviceWorker.register(BASE + 'service-worker.js', { scope: BASE }).then(reg => { registration = reg; return navigator.serviceWorker.ready; });
   ready.catch(() => setStatus('当前浏览器未能启用离线保存，可继续在线体验。'));
   function message(type, progress) {
@@ -40,7 +40,7 @@
     closeGuide();
     const ios = platform === 'ios';
     dialog = document.createElement('div'); dialog.id = 'qinglanInstallGuide';
-    dialog.innerHTML = '<article role="dialog" aria-modal="true" aria-labelledby="qinglanInstallTitle"><button type="button" class="ql-app-close" aria-label="关闭">×</button><img src="/qinglan-orchid/icons/orchid-180.png" width="64" height="64" alt="清兰的蝴蝶兰小卖部图标"><h2 id="qinglanInstallTitle">把“清兰的蝴蝶兰小卖部”放进主屏幕。</h2><p>' + (installed() ? '清兰的蝴蝶兰小卖部已在独立应用窗口中打开。' : ios ? '在 Safari 中，点“分享”，再选择“添加到主屏幕”。若看到“作为网页 App 打开”，请保留开启。' : '在 Chrome 菜单中选择“安装应用”或“添加到主屏幕”。若使用微信内置浏览器，请先在系统浏览器中打开。') + '</p><p>安装后会出现蝴蝶兰图标，名称为“清兰的蝴蝶兰小卖部”。联网体验无需准备离线资源；需要断网使用时再点下方按钮。</p>' + (!isExperience ? '<a class="ql-app-main" href="/qinglan-orchid/experience/?install=' + (ios ? 'ios' : 'android') + '">打开体验并查看安装步骤 ↗</a>' : '') + '<button type="button" class="ql-app-main" data-qinglan-offline="prepare">准备离线资源 · 约 46MB</button><p data-qinglan-offline-status role="status" aria-live="polite">图片、音乐与手势模型均在本机使用。</p><button type="button" class="ql-app-dismiss">知道了</button></article>';
+    dialog.innerHTML = '<article role="dialog" aria-modal="true" aria-labelledby="qinglanInstallTitle"><button type="button" class="ql-app-close" aria-label="关闭">×</button><img src="/qinglan-orchid/icons/orchid-180.png" width="64" height="64" alt="清兰的蝴蝶兰小卖部图标"><h2 id="qinglanInstallTitle">把“清兰的蝴蝶兰小卖部”放进主屏幕。</h2><p>' + (installed() ? '清兰的蝴蝶兰小卖部已在独立应用窗口中打开。' : ios ? '在 Safari 中，点“分享”，再选择“添加到主屏幕”。若看到“作为网页 App 打开”，请保留开启。' : '在 Chrome 菜单中选择“安装应用”或“添加到主屏幕”。若使用微信内置浏览器，请先在系统浏览器中打开。') + '</p><p>安装后会出现蝴蝶兰图标，名称为“清兰的蝴蝶兰小卖部”。联网体验无需准备离线资源；需要断网使用时再点下方按钮。</p>' + (!isExperience ? '<a class="ql-app-main" href="/qinglan-orchid/experience/?install=' + (ios ? 'ios' : 'android') + '">打开体验并查看安装步骤 ↗</a>' : '') + '<button type="button" class="ql-app-main" data-qinglan-offline="prepare">保存离线资源（可选）</button><p data-qinglan-offline-status role="status" aria-live="polite">图片、音乐与手势模型均在本机使用。</p><button type="button" class="ql-app-dismiss">知道了</button></article>';
     document.body.appendChild(dialog);
     dialog.querySelector('.ql-app-close').onclick = closeGuide;
     dialog.querySelector('.ql-app-dismiss').onclick = closeGuide;
