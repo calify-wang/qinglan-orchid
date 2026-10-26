@@ -284,7 +284,18 @@ window.addEventListener('beforeunload',()=>{if(photoURL)URL.revokeObjectURL(phot
 </script>
 <script id="orchid-flower-assets">window.ORCHID_BLOOM_ASSETS=parent.ORCHID_SHARED.bloomAssets;</script>
 <script id="orchid-hand-assets">window.QinglanHandAssets=parent.QinglanHandAssets;</script>
-<script id="orchid-vision-compat">(()=>{const s=document.createElement('script');s.textContent=parent.ORCHID_SHARED.visionCompat;document.head.append(s)})();</script>
+<script id="orchid-vision-compat">(()=>{
+ 'use strict';let ready=null;
+ window.QinglanVisionCompatReady=function(){
+  if(window.QinglanVisionCompat?.HandLandmarker)return Promise.resolve(window.QinglanVisionCompat);
+  if(!ready)ready=parent.OrchidExperienceResources.prepareVisionCompat().then(text=>{
+   if(!window.QinglanVisionCompat?.HandLandmarker){const node=document.createElement('script');node.id='qinglan-vision-compat-runtime';node.textContent=text;document.head.append(node);}
+   if(!window.QinglanVisionCompat?.HandLandmarker)throw Object.assign(new Error('Safari兼容识别组件未能运行，请重新开启手势。'),{code:'compat-runtime-missing'});
+   return window.QinglanVisionCompat;
+  }).catch(error=>{ready=null;throw error;});
+  return ready;
+ };
+})();</script>
 <script id="orchid-two-hand-camera">
 /* Orchid two-hand camera engine: local MediaPipe Tasks 0.10.21, two hands.
  * Public API: window.OrchidHands = { start, stop, status, support, processLandmarks }.
@@ -441,10 +452,23 @@ window.addEventListener('beforeunload',()=>{if(photoURL)URL.revokeObjectURL(phot
     if(!live(s))throw cancelError();
     s.backend=s.workerDelegate==='GPU'?'worker-gpu':'worker-cpu';s.interval=1000/WORKER_FPS;
   }
+  function waitForStartupTask(s,work,timeoutMs){return new Promise((resolve,reject)=>{
+    let settled=false,timer=0;
+    const finish=(fn,value)=>{
+      if(settled){if(fn===resolve&&value&&typeof value.close==='function'){try{value.close();}catch(_){}}return;}
+      settled=true;clearTimeout(timer);s.startupCancels.delete(cancel);fn(value);
+    };
+    const cancel=()=>finish(reject,cancelError());s.startupCancels.add(cancel);
+    if(timeoutMs)timer=setTimeout(()=>{if(!live(s)){cancel();return;}try{parent.PortalCamera?.stop('model-init-timeout');}catch(_){}finish(reject,Object.assign(new Error('手势组件已下载，但本机识别启动超过45秒。'),{code:'model-init-timeout'}));},timeoutMs);
+    Promise.resolve().then(()=>{if(!live(s))throw cancelError();return work();}).then(value=>finish(resolve,value),error=>finish(reject,error));
+    if(!live(s))cancel();
+  });}
   async function createMainModel(s){
     const a=normalizedAssets();
     let runtime;
     if(s.safari){
+      publish({state:'loading',capturePhase:'model-loading',camera:true,hand:false,message:'正在准备Safari兼容识别组件，可继续触屏操作…'});
+      await waitForStartupTask(s,()=>window.QinglanVisionCompatReady());
       runtime=window.QinglanVisionCompat;
       if(!runtime?.HandLandmarker)throw Object.assign(new Error('Safari兼容识别组件未载入，请从最新链接重新打开页面。'),{code:'compat-runtime-missing'});
     }else runtime=await import(assetURL(s,a.runtime,'text/javascript'));
@@ -452,7 +476,8 @@ window.addEventListener('beforeunload',()=>{if(photoURL)URL.revokeObjectURL(phot
     const buffer=await assetBytes(a.model);
     if(!live(s))throw cancelError();
     const glCanvas=document.createElement('canvas');glCanvas.width=1;glCanvas.height=1;
-    const prepared=await runtime.HandLandmarker.createFromOptions({wasmLoaderPath:assetURL(s,a.loader,'text/javascript'),wasmBinaryPath:assetURL(s,a.wasm,'application/wasm')},{baseOptions:{modelAssetBuffer:buffer,delegate:'CPU'},canvas:glCanvas,runningMode:'VIDEO',numHands:2,minHandDetectionConfidence:.65,minHandPresenceConfidence:.65,minTrackingConfidence:.65});
+    publish({state:'loading',capturePhase:'model-loading',camera:true,hand:false,message:'手势组件已准备好，正在本机启动识别…'});
+    const prepared=await waitForStartupTask(s,()=>runtime.HandLandmarker.createFromOptions({wasmLoaderPath:assetURL(s,a.loader,'text/javascript'),wasmBinaryPath:assetURL(s,a.wasm,'application/wasm')},{baseOptions:{modelAssetBuffer:buffer,delegate:'CPU'},canvas:glCanvas,runningMode:'VIDEO',numHands:2,minHandDetectionConfidence:.65,minHandPresenceConfidence:.65,minTrackingConfidence:.65}),45000);
     if(!live(s)){prepared.close();throw cancelError();}
     s.model=prepared;s.canvas=document.createElement('canvas');s.context=s.canvas.getContext('2d',{alpha:false});
     if(!s.context)throw new Error('浏览器无法建立画面缓冲区');
@@ -494,6 +519,7 @@ window.addEventListener('beforeunload',()=>{if(photoURL)URL.revokeObjectURL(phot
 
     function humanError(e) {
     const name=e?.name||'', code=e?.code;
+    if(code==='model-init-timeout')return {code,message:'手势识别启动超时，摄像头已关闭，请重新开启。'};
     if(code==='assets-missing')return {code,message:e.message};
     if(code==='compat-runtime-missing')return {code,message:e.message};
     if(code==='camera-release-pending')return {code,message:'上一轮摄像头申请仍未结束。请先处理浏览器的相机权限提示；如已停止仍不能重开，请刷新本页后再试。'};
@@ -1434,4 +1460,97 @@ window.QinglanSound=Object.freeze({version:'1.0.0',enable,disable,toggle:()=>ena
  for(const name of ['qinglan-camera-state','orchid-camera-state'])window.addEventListener(name,()=>publish('camera'));window.addEventListener('qinglan-sound-change',()=>publish('sound'));document.addEventListener('pointerdown',event=>{if(event.isTrusted)window.parent.ORCHID_SHARED.noteActivation()},{capture:true,passive:true});document.addEventListener('click',event=>{if(event.isTrusted)window.parent.ORCHID_SHARED.noteActivation()},{capture:true,passive:true});
  window.parent.postMessage({type:'orchid-scene-ready',mode},'*');
 })();
-</script></body></html>
+</script><script id="qinglan-camera-preview-runtime">(function previewRuntime(mode) {
+  'use strict';
+  if (window.OrchidCameraPreview) return;
+  var last = {}, observedVideo = null, bar = null, label = null, message = null;
+  var ids = mode === 'shop'
+    ? { video: 'mobileHandVideo', host: 'cameraPreviewDock', button: 'startMobileCamera' }
+    : mode === 'lab'
+      ? { video: 'bloomVideo', host: 'cameraPod', button: 'labStartCamera' }
+      : { video: 'bloomVideo', host: 'cameraWrap', button: 'startBloomCamera' };
+  var style = document.createElement('style');
+  style.id = 'qinglan-camera-preview-style';
+  style.textContent =
+    '#qinglanCameraProgress[hidden]{display:none!important}' +
+    '#qinglanCameraProgress{box-sizing:border-box;display:flex;flex-direction:column;gap:5px;padding:12px 15px;border:1px solid #aab99a;border-radius:12px;background:#eef0df;color:#214c38;text-align:left;font:650 14px/1.55 "Microsoft YaHei","PingFang SC",sans-serif;letter-spacing:0;overflow-wrap:anywhere}' +
+    '#qinglanCameraProgress strong{font:800 15px/1.5 "Microsoft YaHei","PingFang SC",sans-serif;letter-spacing:0;color:#214c38}' +
+    '#qinglanCameraProgress span{font-weight:650}' +
+    '#cameraWrap+#qinglanCameraProgress{margin:12px 0 0}' +
+    '#cameraPod[data-camera-preparing="true"]{width:min(300px,calc(100vw - 24px))}' +
+    '#cameraPod>#qinglanCameraProgress{margin:5px 8px 0;padding:9px 10px;border-radius:9px;font-size:12px}' +
+    '#cameraPod>#qinglanCameraProgress strong{font-size:13px}' +
+    '#cameraPod[data-camera-preparing="true"]>#labCameraMessage{font-weight:650;font-size:12px;line-height:1.5}' +
+    '#cameraPreviewDock[data-camera-preparing="true"]{flex-wrap:wrap;max-width:min(340px,calc(100vw - 24px))}' +
+    '#cameraPreviewDock>#qinglanCameraProgress{flex:0 0 100%;order:10;padding:8px 10px;font-size:12px;border-radius:8px}' +
+    '#cameraPreviewDock>#qinglanCameraProgress strong{font-size:13px}' +
+    '#cameraPreviewDock[data-camera-preparing="true"] #cameraPreviewStatus{font:750 12px/1.5 "Microsoft YaHei","PingFang SC",sans-serif;white-space:normal;max-width:140px}' +
+    '@media(max-width:700px){#qinglanCameraProgress{padding:11px 12px;font-size:14px}#qinglanCameraProgress strong{font-size:14px}}';
+  document.head.appendChild(style);
+  function text(node, value) { if (node && node.textContent !== value) node.textContent = value; }
+  function engine() { return window.OrchidHands || window.QinglanCamera; }
+  function ready(video, detail) {
+    return !!(detail.camera && video && video.srcObject && video.readyState >= 2 &&
+      !video.paused && video.videoWidth > 0 && video.videoHeight > 0);
+  }
+  function installBar(host) {
+    if (bar || !host) return;
+    bar = document.createElement('div'); bar.id = 'qinglanCameraProgress';
+    bar.hidden = true; bar.setAttribute('role', 'status'); bar.setAttribute('aria-live', 'polite');
+    label = document.createElement('strong'); label.id = 'qinglanCameraProgressLabel';
+    message = document.createElement('span'); message.id = 'qinglanCameraProgressMessage';
+    bar.appendChild(label); bar.appendChild(message);
+    if (mode === 'bloom') host.insertAdjacentElement('afterend', bar);
+    else host.appendChild(bar);
+  }
+  function observe(video) {
+    if (!video || video === observedVideo) return;
+    if (observedVideo) ['loadeddata', 'playing', 'resize', 'emptied', 'pause'].forEach(function (name) {
+      observedVideo.removeEventListener(name, onVideo);
+    });
+    observedVideo = video;
+    ['loadeddata', 'playing', 'resize', 'emptied', 'pause'].forEach(function (name) {
+      video.addEventListener(name, onVideo);
+    });
+  }
+  function onVideo() { draw(last); }
+  function draw(detail) {
+    last = detail || {};
+    var host = document.getElementById(ids.host), video = document.getElementById(ids.video);
+    installBar(host); observe(video);
+    var busy = last.state === 'requesting' || last.state === 'loading';
+    var running = last.state === 'running' || last.running === true;
+    var previewReady = ready(video, last);
+    if (host) host.setAttribute('data-camera-preparing', String(busy));
+    if (bar) {
+      bar.hidden = !busy;
+      if (busy) {
+        text(label, previewReady ? '摄像头已连接 · 手势准备中' : '正在连接摄像头');
+        text(message, last.message || (previewReady ? '画面已经就绪，正在启动手势识别…' : '请在浏览器提示中允许摄像头。'));
+      }
+    }
+    var button = document.getElementById(ids.button);
+    if (busy && button) text(button, previewReady ? '正在准备手势…' : '正在连接摄像头…');
+    if (mode === 'bloom') {
+      var placeholder = document.getElementById('cameraEmpty');
+      if (placeholder) placeholder.hidden = running || previewReady;
+      text(document.getElementById('cameraBadge'), running || previewReady ? 'CAMERA / LIVE' : busy ? 'CAMERA / PREPARING' : 'CAMERA / OFF');
+      if (busy && previewReady) text(document.getElementById('handsBadge'), '手势准备中');
+      else if (running && document.getElementById('handsBadge') && document.getElementById('handsBadge').textContent === '手势准备中') text(document.getElementById('handsBadge'), '等待你的手');
+    } else if (mode === 'lab') {
+      if (busy && previewReady) text(document.getElementById('cameraHandCount'), '画面已连接 · 手势准备中');
+      else if (running && document.getElementById('cameraHandCount') && document.getElementById('cameraHandCount').textContent === '画面已连接 · 手势准备中') text(document.getElementById('cameraHandCount'), '等待手部');
+    } else if (busy) {
+      text(document.getElementById('cameraPreviewStatus'), previewReady ? '画面已连接 · 手势准备中' : '正在连接摄像头');
+    }
+  }
+  window.addEventListener(mode === 'shop' ? 'qinglan-camera-state' : 'orchid-camera-state', function (event) { draw(event.detail); });
+  window.OrchidCameraPreview = Object.freeze({
+    status: function () {
+      return { mode: mode, phase: last.capturePhase || null, previewReady: ready(document.getElementById(ids.video), last),
+        preparing: !bar || bar.hidden ? false : true, message: message && message.textContent || '' };
+    }
+  });
+  var camera = engine(); draw(camera && camera.status ? camera.status() : {});
+})("bloom");</script>
+</body></html>

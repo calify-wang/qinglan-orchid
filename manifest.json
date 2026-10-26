@@ -3,21 +3,21 @@
   "downloads": [
     {
       "asset": "Qinglan-Windows.zip",
-      "bytes": 165131234,
-      "sha256": "83be295ca1f440b8dea7567aed07f379ecf529b8c42738e2e6f639a9b2c593ff",
-      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.1/Qinglan-Windows.zip"
+      "bytes": 165136543,
+      "sha256": "44126b4266de935b4d8b016bcabfe19b4fbfd4ddbb24d357977acca6d2988d59",
+      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.4/Qinglan-Windows.zip"
     },
     {
       "asset": "Qinglan-macOS-Intel.zip",
-      "bytes": 147105154,
-      "sha256": "556dde066b74281b1d06df59f63eba33f2f2f874cbcadd5212fb532a350ff0ee",
-      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.2/Qinglan-macOS-Intel.zip"
+      "bytes": 147111104,
+      "sha256": "d41d74733700e76cc37bc96215bca69feeeef2490a077da11c3ba1020369d617",
+      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.4/Qinglan-macOS-Intel.zip"
     },
     {
       "asset": "Qinglan-macOS-AppleSilicon.zip",
-      "bytes": 142226448,
-      "sha256": "35f604b1c1eb1e2d76e8418a9995eb4e894a01bb8c4e6c015e63d121db4c286b",
-      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.2/Qinglan-macOS-AppleSilicon.zip"
+      "bytes": 142232398,
+      "sha256": "fb0a9939b24418cfe31b17d873709e1d962068e40a08786edd006eb6c315fcae",
+      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.4/Qinglan-macOS-AppleSilicon.zip"
     },
     {
       "asset": "qinglan-offline.html",
@@ -27,10 +27,11 @@
     },
     {
       "asset": "Qinglan-Android.apk",
-      "bytes": 32871377,
-      "sha256": "c5495e63abb504d7f877ee1e4fecff2ab4c30fb0f21d0f1837e7d59d4fed0316",
-      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.0/Qinglan-Android.apk"
+      "bytes": 32875473,
+      "sha256": "05564f1b77c764eb130b85e40270f6fa76d1c2bc0dc525e9a69d816753c9c2d8",
+      "url": "https://github.com/calify-wang/qinglan-orchid/releases/download/v1.1.4/Qinglan-Android.apk",
+      "mirrorURL": "/qinglan-orchid/assets/downloads/Qinglan-Android-1.1.4.apk"
     }
   ],
-  "siteVersion": "1.1.3"
+  "siteVersion": "1.1.4"
 }
